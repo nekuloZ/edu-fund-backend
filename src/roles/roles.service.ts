@@ -13,18 +13,15 @@ export class RolesService {
     private readonly roleRepository: Repository<Role>,
   ) {}
 
-  // Create a new role
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     const newRole = this.roleRepository.create(createRoleDto);
     return await this.roleRepository.save(newRole);
   }
 
-  // Retrieve all roles
   async findAll(): Promise<Role[]> {
     return await this.roleRepository.find();
   }
 
-  // Retrieve a specific role by ID
   async findOne(id: number): Promise<Role> {
     const role = await this.roleRepository.findOne({ where: { id } });
     if (!role) {
@@ -33,14 +30,12 @@ export class RolesService {
     return role;
   }
 
-  // Update a role by ID
   async update(id: number, updateRoleDto: UpdateRoleDto): Promise<Role> {
     const role = await this.findOne(id);
     Object.assign(role, updateRoleDto);
     return await this.roleRepository.save(role);
   }
 
-  // Delete a role by ID
   async remove(id: number): Promise<void> {
     const result = await this.roleRepository.delete(id);
     if (result.affected === 0) {
@@ -48,7 +43,6 @@ export class RolesService {
     }
   }
 
-  // 使用原生 SQL 查询用户的角色
   async getUserRoles(userId: number): Promise<string[]> {
     const roles = await this.dataSource
       .createQueryBuilder()

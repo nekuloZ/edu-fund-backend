@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,8 +22,19 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll(
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    // 处理默认值，确保 page 和 pageSize 始终为有效数值
+    const pageNumber =
+      page && !isNaN(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    const sizeNumber =
+      pageSize && !isNaN(Number(pageSize)) && Number(pageSize) > 0
+        ? Number(pageSize)
+        : 10;
+
+    return await this.usersService.getUsers(pageNumber, sizeNumber);
   }
 
   @Get(':id')

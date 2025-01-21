@@ -18,12 +18,42 @@ export class UsersService {
     return this.usersRepository.save(user); // 保存到数据库
   }
 
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find(); // 查询所有用户
+  async findOne(id: number) {
+    return await this.usersRepository.findOne({
+      where: { id },
+      relations: ['roles'],
+    });
   }
-
-  findOne(id: number): Promise<User> {
-    return this.usersRepository.findOne({ where: { id } }); // 按 ID 查询用户
+  async getUsers(page: number, pageSize: number) {
+    try {
+      const [users, total] = await this.usersRepository.findAndCount({
+        relations: ['roles'],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        order: {
+          id: 'ASC', // 添加排序
+        },
+      });
+      return {
+        currentPage: page,
+        pageSize,
+        total,
+        users: users.map((user) => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          avatar: user.avatar,
+          roles: user.roles.map((role) => ({
+            id: role.id,
+            name: role.name, // 如果数据库中为空，会返回空字符串
+            permissions: role.permissions || [], // 防止权限字段为 null
+          })),
+        })),
+      };
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
   }
   findByUsername(username: string): Promise<User> {
     return this.usersRepository.findOne({ where: { username } });
