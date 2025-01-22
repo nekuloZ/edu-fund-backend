@@ -25,6 +25,7 @@ export class UsersController {
   async findAll(
     @Query('page') page?: number,
     @Query('pageSize') pageSize?: number,
+    @Query('search') search?: string,
   ) {
     // 处理默认值，确保 page 和 pageSize 始终为有效数值
     const pageNumber =
@@ -34,12 +35,7 @@ export class UsersController {
         ? Number(pageSize)
         : 10;
 
-    return await this.usersService.getUsers(pageNumber, sizeNumber);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return await this.usersService.getUsers(pageNumber, sizeNumber, search);
   }
 
   @Patch(':id')
