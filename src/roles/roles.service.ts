@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, Like } from 'typeorm';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './entities/role.entity';
@@ -29,7 +29,11 @@ export class RolesService {
     }
     return role;
   }
-
+  async findByName(name: string): Promise<Role[]> {
+    return await this.roleRepository.find({
+      where: { name: Like(`%${name}%`) }, // 模糊搜索
+    });
+  }
   async update(id: number, updateRoleDto: UpdateRoleDto): Promise<Role> {
     const role = await this.findOne(id);
     Object.assign(role, updateRoleDto);

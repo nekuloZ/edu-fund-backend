@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -21,7 +22,10 @@ export class RolesController {
   }
 
   @Get()
-  findAll() {
+  async findAll(@Query('name') name?: string) {
+    if (name) {
+      return this.rolesService.findByName(name);
+    }
     return this.rolesService.findAll();
   }
 
