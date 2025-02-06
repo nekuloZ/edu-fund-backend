@@ -5,8 +5,9 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 //import { AuthModule } from './auth/auth.module';
-import { PermissionsModule } from './permissions/permissions.module';
+import { PermissionModule } from './permissions/permissions.module';
 import { RolePermissionsModule } from './role-permissions/role-permissions.module';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -17,13 +18,13 @@ import { RolePermissionsModule } from './role-permissions/role-permissions.modul
       password: 'P@ssw0rd',
       database: 'demo',
       autoLoadEntities: true,
-      synchronize: true, // 开发环境下可以设为 true
+      synchronize: false,
       logging: true, // 添加日志记录
     }),
     UsersModule,
     RolesModule,
     // AuthModule,
-    PermissionsModule,
+    PermissionModule,
     RolePermissionsModule,
   ],
   controllers: [AppController],

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Role } from '../../roles/entities/role.entity';
 
 @Entity('permissions')
 export class Permission {
@@ -9,8 +10,11 @@ export class Permission {
   name: string;
 
   @Column({ unique: true })
-  code: string;
+  code: string; // 如 USER_MANAGEMENT, PROJECT_MANAGEMENT
 
-  @Column({ nullable: true })
+  @Column()
   description: string;
+
+  @ManyToMany(() => Role, (role) => role.permissions)
+  roles: Role[];
 }

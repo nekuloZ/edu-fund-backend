@@ -4,13 +4,15 @@ import { Repository, DataSource, Like } from 'typeorm';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './entities/role.entity';
-
+import { Permission } from '../permissions/entities/permission.entity';
 @Injectable()
 export class RolesService {
   constructor(
     private readonly dataSource: DataSource,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>,
   ) {}
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
@@ -34,10 +36,22 @@ export class RolesService {
       where: { name: Like(`%${name}%`) }, // 模糊搜索
     });
   }
-  async update(id: number, updateRoleDto: UpdateRoleDto): Promise<Role> {
-    const role = await this.findOne(id);
+  async update(id: number, updateRoleDto: UpdateRoleDto) {
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['permissions'],
+    });
+
+    // 更新权限关联
+    if (updateRoleDto.permissionIds) {
+      const permissions = await this.permissionRepository.findByIds(
+        updateRoleDto.permissionIds,
+      );
+      role.permissions = permissions;
+    }
+
     Object.assign(role, updateRoleDto);
-    return await this.roleRepository.save(role);
+    return this.roleRepository.save(role);
   }
 
   async remove(id: number): Promise<void> {

@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
-import { PermissionsService } from './permissions.service';
-import { PermissionsController } from './permissions.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Permission } from './entities/permission.entity';
+import { PermissionService } from './permissions.service';
+import { PermissionController } from './permissions.controller';
 
 @Module({
-  controllers: [PermissionsController],
-  providers: [PermissionsService],
+  imports: [TypeOrmModule.forFeature([Permission])], // 注册 TypeORM 实体
+  controllers: [PermissionController],
+  providers: [PermissionService],
+  exports: [PermissionService], // 允许其他模块使用 PermissionService
 })
-export class PermissionsModule {}
+export class PermissionModule {}
