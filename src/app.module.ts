@@ -2,11 +2,16 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { RolesModule } from './roles/roles.module';
 //import { AuthModule } from './auth/auth.module';
-import { PermissionModule } from './permissions/permissions.module';
-import { RolePermissionsModule } from './role-permissions/role-permissions.module';
+import { UserModule } from './user/user.module';
+import { NotificationModule } from './notification/notification.module';
+import { DisbursementRecordModule } from './disbursement-record/disbursement-record.module';
+import { ReviewLogModule } from './review-log/review-log.module';
+import { ApplicationAttachmentModule } from './application-attachment/application-attachment.module';
+import { FundApplicationModule } from './fund-application/fund-application.module';
+import { FundInstitutionModule } from './fund-institution/fund-institution.module';
+import { PermissionModule } from './permission/permission.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -16,16 +21,21 @@ import { RolePermissionsModule } from './role-permissions/role-permissions.modul
       port: 3306,
       username: 'root',
       password: 'P@ssw0rd',
-      database: 'demo',
+      database: 'demo2',
       autoLoadEntities: true,
       synchronize: false,
       logging: true, // 添加日志记录
     }),
-    UsersModule,
-    RolesModule,
-    // AuthModule,
+    UserModule,
+    RoleModule,
     PermissionModule,
-    RolePermissionsModule,
+    FundInstitutionModule,
+    FundApplicationModule,
+    ApplicationAttachmentModule,
+    ReviewLogModule,
+    DisbursementRecordModule,
+    NotificationModule,
+    // AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
