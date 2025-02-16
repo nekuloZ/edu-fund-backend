@@ -1,26 +1,33 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { FundInstitution } from './entities/fund-institution.entity';
 import { CreateFundInstitutionDto } from './dto/create-fund-institution.dto';
-import { UpdateFundInstitutionDto } from './dto/update-fund-institution.dto';
 
 @Injectable()
 export class FundInstitutionService {
-  create(createFundInstitutionDto: CreateFundInstitutionDto) {
-    return 'This action adds a new fundInstitution';
+  constructor(
+    @InjectRepository(FundInstitution)
+    private fundInstitutionRepository: Repository<FundInstitution>,
+  ) {}
+
+  // 创建新的基金机构
+  async create(
+    createFundInstitutionDto: CreateFundInstitutionDto,
+  ): Promise<FundInstitution> {
+    const fundInstitution = this.fundInstitutionRepository.create(
+      createFundInstitutionDto,
+    );
+    return await this.fundInstitutionRepository.save(fundInstitution);
   }
 
-  findAll() {
-    return `This action returns all fundInstitution`;
+  // 获取所有基金机构
+  async findAll(): Promise<FundInstitution[]> {
+    return await this.fundInstitutionRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} fundInstitution`;
-  }
-
-  update(id: number, updateFundInstitutionDto: UpdateFundInstitutionDto) {
-    return `This action updates a #${id} fundInstitution`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} fundInstitution`;
+  // 根据ID查询单个基金机构
+  async findOne(id: number): Promise<FundInstitution> {
+    return await this.fundInstitutionRepository.findOneBy({ id });
   }
 }

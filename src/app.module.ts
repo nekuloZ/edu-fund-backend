@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-//import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { NotificationModule } from './notification/notification.module';
 import { DisbursementRecordModule } from './disbursement-record/disbursement-record.module';
@@ -12,6 +11,10 @@ import { FundApplicationModule } from './fund-application/fund-application.modul
 import { FundInstitutionModule } from './fund-institution/fund-institution.module';
 import { PermissionModule } from './permission/permission.module';
 import { RoleModule } from './role/role.module';
+import { RolePermissionModule } from './role-permission/role-permission.module';
+import { AuthModule } from './auth/auth.module';
+import { FundDonationModule } from './fund-donation/fund-donation.module';
+import { FundDynamicLogModule } from './fund-dynamic-log/fund-dynamic-log.module';
 
 @Module({
   imports: [
@@ -26,6 +29,7 @@ import { RoleModule } from './role/role.module';
       synchronize: false,
       logging: true, // 添加日志记录
     }),
+    AuthModule,
     UserModule,
     RoleModule,
     PermissionModule,
@@ -35,7 +39,9 @@ import { RoleModule } from './role/role.module';
     ReviewLogModule,
     DisbursementRecordModule,
     NotificationModule,
-    // AuthModule,
+    RolePermissionModule,
+    FundDonationModule,
+    FundDynamicLogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

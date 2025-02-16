@@ -1,34 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { FundInstitutionService } from './fund-institution.service';
 import { CreateFundInstitutionDto } from './dto/create-fund-institution.dto';
-import { UpdateFundInstitutionDto } from './dto/update-fund-institution.dto';
 
-@Controller('fund-institution')
+@Controller('fund-institutions')
 export class FundInstitutionController {
-  constructor(private readonly fundInstitutionService: FundInstitutionService) {}
+  constructor(
+    private readonly fundInstitutionService: FundInstitutionService,
+  ) {}
 
+  // 创建基金机构
   @Post()
-  create(@Body() createFundInstitutionDto: CreateFundInstitutionDto) {
+  async create(@Body() createFundInstitutionDto: CreateFundInstitutionDto) {
     return this.fundInstitutionService.create(createFundInstitutionDto);
   }
 
+  // 获取所有基金机构
   @Get()
-  findAll() {
+  async findAll() {
     return this.fundInstitutionService.findAll();
   }
 
+  // 根据ID获取基金机构
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.fundInstitutionService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFundInstitutionDto: UpdateFundInstitutionDto) {
-    return this.fundInstitutionService.update(+id, updateFundInstitutionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.fundInstitutionService.remove(+id);
+  async findOne(@Param('id') id: number) {
+    return this.fundInstitutionService.findOne(id);
   }
 }

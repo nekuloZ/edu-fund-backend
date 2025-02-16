@@ -22,5 +22,6 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     'linebreak-style': ['error', 'windows'], // 设置为 Windows 换行符
+    '@typescript-eslint/no-unused-vars': ['error'],
   },
 };
