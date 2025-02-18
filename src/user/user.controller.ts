@@ -1,49 +1,77 @@
 import {
   Controller,
   Post,
-  Body,
   Get,
-  Param,
   Put,
+  Delete,
+  Param,
+  Body,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { AssignRoleDto } from './dto/assign-role.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard'; // 引入权限验证守卫
-import { Roles } from '../auth/roles.decorator'; // 引入角色装饰器
 
-@Controller('users')
+@Controller('api/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('register')
+  /**
+   * 用户注册接口
+   * POST /api/users
+   */
+  @Post()
   async register(@Body() createUserDto: CreateUserDto) {
-    return this.userService.register(createUserDto);
+    return await this.userService.register(createUserDto);
   }
 
-  @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto) {
-    return this.userService.login(loginUserDto);
+  /**
+   * 获取指定用户详情（包含关联角色）
+   * GET /api/users/:id
+   * 该接口受 JWT 保护，只有登录用户才能访问
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getUser(@Param('id') id: number) {
+    return await this.userService.findById(id);
   }
 
-  // 获取所有用户（仅管理员可以访问）
-  @Roles('admin') // 只有 admin 角色才可以访问
-  @UseGuards(JwtAuthGuard, RolesGuard) // 使用 JWT 认证和角色守卫
-  @Get()
-  async getAllUsers() {
-    return this.userService.findAll();
-  }
-
-  // 更新用户信息（管理员和财务人员可以访问）
-  @Roles('admin', 'finance') // 允许 admin 和 finance 角色访问
-  @UseGuards(JwtAuthGuard, RolesGuard) // 使用 JWT 认证和角色守卫
+  /**
+   * 更新用户信息接口
+   * PUT /api/users/:id
+   */
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async updateUser(
     @Param('id') id: number,
-    @Body() updateData: Partial<CreateUserDto>,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.updateUser(id, updateData);
+    return await this.userService.updateUser(id, updateUserDto);
+  }
+
+  /**
+   * 删除用户接口（仅限管理员操作，权限判断可在 Guard 中实现）
+   * DELETE /api/users/:id
+   */
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteUser(@Param('id') id: number) {
+    await this.userService.deleteUser(id);
+    return { message: '用户删除成功' };
+  }
+
+  /**
+   * 为指定用户分配角色
+   * POST /api/users/:id/roles
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/roles')
+  async assignRoles(
+    @Param('id') id: number,
+    @Body() assignRoleDto: AssignRoleDto,
+  ) {
+    return await this.userService.assignRoles(id, assignRoleDto);
   }
 }

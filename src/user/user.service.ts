@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
 import { Role } from '../role/entities/role.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { AssignRoleDto } from './dto/assign-role.dto';
 
 @Injectable()
 export class UserService {
@@ -15,103 +19,95 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
-    private readonly jwtService: JwtService,
   ) {}
 
+  /**
+   * 用户注册业务逻辑：
+   * 1. 检查用户名是否已存在
+   * 2. 对密码进行加密
+   * 3. 创建并保存用户记录
+   */
   async register(createUserDto: CreateUserDto): Promise<User> {
-    const { username, password, phone, email } = createUserDto;
-
+    // 检查用户名是否已存在
     const existingUser = await this.userRepository.findOne({
-      where: { username },
+      where: { username: createUserDto.username },
     });
     if (existingUser) {
-      throw new Error('Username already exists');
+      throw new ConflictException('用户名已存在');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.userRepository.create({
-      username,
-      password: hashedPassword,
-      phone,
-      email,
-    });
+    // 对密码进行加密处理
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
+    // 创建用户对象并保存到数据库
+    const user = this.userRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
     return await this.userRepository.save(user);
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<{ access_token: string }> {
-    const { username, password } = loginUserDto;
-
-    const user = await this.userRepository.findOne({ where: { username } });
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new Error('Invalid password');
-    }
-
-    const payload = { username: user.username, sub: user.user_id };
-    const access_token = this.jwtService.sign(payload);
-
-    return { access_token };
-  }
-
-  // 获取用户的角色
-  async getUserRoles(userId: number): Promise<string[]> {
+  /**
+   * 根据用户ID获取用户详情，并加载关联角色数据
+   */
+  async findById(id: number): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
       relations: ['roles'],
     });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException(`用户ID ${id} 未找到`);
     }
-
-    // 获取角色名称列表
-    return user.roles.map((role) => role.role_name);
+    return user;
+  }
+  /**
+   * 根据用户名获取用户详情
+   */
+  async findByUsername(username: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { username } });
   }
 
-  async updateUser(
+  /**
+   * 更新用户信息：
+   * 1. 如果包含密码字段，则先加密新密码
+   * 2. 更新用户的其他信息
+   */
+  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+    await this.userRepository.update(id, updateUserDto);
+    return this.findById(id);
+  }
+
+  /**
+   * 删除用户：
+   * 删除用户记录（级联删除用户与角色、权限关联）
+   */
+  async deleteUser(id: number): Promise<void> {
+    await this.userRepository.delete(id);
+  }
+
+  /**
+   * 分配角色给指定用户：
+   * 1. 根据传入的角色ID数组查询角色
+   * 2. 将角色分配给用户并保存
+   */
+  async assignRoles(
     userId: number,
-    updateData: Partial<CreateUserDto>,
+    assignRoleDto: AssignRoleDto,
   ): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!user) {
-      throw new Error('User not found');
+    // 根据用户ID查询用户详情
+    const user = await this.findById(userId);
+
+    // 根据传入的角色ID查询角色记录
+    const roles = await this.roleRepository.findByIds(assignRoleDto.roleIds);
+    if (!roles || roles.length === 0) {
+      throw new NotFoundException('未找到对应的角色');
     }
 
-    Object.assign(user, updateData);
-    return this.userRepository.save(user);
-  }
-
-  async changePassword(
-    userId: number,
-    oldPassword: string,
-    newPassword: string,
-  ): Promise<boolean> {
-    const user = await this.userRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
-    if (!isPasswordValid) {
-      throw new Error('Old password is incorrect');
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    await this.userRepository.save(user);
-
-    return true;
-  }
-
-  async findAll(): Promise<User[]> {
-    return await this.userRepository.find();
+    // 更新用户的角色信息
+    user.roles = roles;
+    return await this.userRepository.save(user);
   }
 }

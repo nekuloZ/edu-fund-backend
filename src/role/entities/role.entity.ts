@@ -16,8 +16,7 @@ export class Role {
   @Column({
     type: 'varchar',
     length: 50,
-    comment:
-      '角色名称，如applicant、auditor、finance、admin、fund_institution等',
+    comment: '角色名称，如admin、user、student等',
   })
   role_name: string;
 
