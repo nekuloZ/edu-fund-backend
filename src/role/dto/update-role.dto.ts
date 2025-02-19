@@ -1,4 +1,15 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateRoleDto } from './create-role.dto';
+import { IsString, IsOptional } from 'class-validator';
 
-export class UpdateRoleDto extends PartialType(CreateRoleDto) {}
+/**
+ * 用于更新角色信息，
+ * 角色名称和描述均为可选字段。
+ */
+export class UpdateRoleDto {
+  @IsString()
+  @IsOptional()
+  role_name?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+}

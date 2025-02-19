@@ -1,37 +1,38 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsOptional,
-  IsEmail,
-  IsPhoneNumber,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateFundInstitutionDto {
+  // 机构名称不能为空
+  @IsString()
   @IsNotEmpty()
+  institution_name: string;
+
+  // 机构编码可选
   @IsString()
-  institution_name: string; // 机构名称
-
   @IsOptional()
+  institution_code?: string;
+
+  // 联系人可选
   @IsString()
-  institution_code: string; // 机构编码（可选）
+  @IsOptional()
+  contact_person?: string;
 
-  @IsNotEmpty()
+  // 联系电话可选
   @IsString()
-  contact_person: string; // 联系人
-
   @IsOptional()
-  @IsPhoneNumber()
-  phone: string; // 联系电话
+  phone?: string;
 
-  @IsOptional()
-  @IsEmail()
-  email: string; // 邮箱地址
-
-  @IsOptional()
+  // 邮箱地址可选
   @IsString()
-  address: string; // 机构地址
-
   @IsOptional()
+  email?: string;
+
+  // 机构地址可选
   @IsString()
-  description: string; // 机构描述
+  @IsOptional()
+  address?: string;
+
+  // 机构描述可选
+  @IsString()
+  @IsOptional()
+  description?: string;
 }

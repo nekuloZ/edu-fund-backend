@@ -41,10 +41,11 @@ export class FundApplication {
 
   @Column({
     type: 'enum',
-    enum: ['public_pool', 'other'],
-    comment: '项目类型：public_pool（公共池）或other（其他项目）',
+    enum: ['public_pool', 'scholarship', 'grant'],
+    comment:
+      '项目类型：public_pool（公共池）、scholarship（奖学金）、grant（助学金）',
   })
-  project_type: 'public_pool' | 'other';
+  project_type: 'public_pool' | 'scholarship' | 'grant';
 
   @Column({
     type: 'enum',

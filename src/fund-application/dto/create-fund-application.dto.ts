@@ -1,44 +1,29 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsNumber,
-  IsEnum,
-  IsOptional,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsEnum } from 'class-validator';
+
+export enum ProjectType {
+  PUBLIC_POOL = 'public_pool',
+  SCHOLARSHIP = 'scholarship',
+  GRANT = 'grant',
+}
 
 export class CreateFundApplicationDto {
-  @IsNotEmpty()
   @IsString()
-  title: string; // 项目标题
-
-  @IsOptional()
-  @IsString()
-  description: string; // 项目详细描述
-
   @IsNotEmpty()
+  title: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
   @IsNumber()
-  amount_requested: number; // 申请金额
+  @IsNotEmpty()
+  amount_requested: number;
 
-  @IsOptional()
   @IsString()
-  use_plan: string; // 资金使用计划
-
   @IsNotEmpty()
-  @IsEnum(['public_pool', 'other'])
-  project_type: 'public_pool' | 'other'; // 项目类型
+  use_plan: string;
 
+  @IsEnum(ProjectType)
   @IsNotEmpty()
-  @IsEnum([
-    'submitted',
-    'pending_review',
-    'approved',
-    'rejected',
-    'needs_revision',
-  ])
-  status:
-    | 'submitted'
-    | 'pending_review'
-    | 'approved'
-    | 'rejected'
-    | 'needs_revision'; // 项目状态
+  project_type: ProjectType;
 }

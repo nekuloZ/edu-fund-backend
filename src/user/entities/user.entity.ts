@@ -4,8 +4,13 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   JoinTable,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Role } from '../../role/entities/role.entity';
+import { FundInstitution } from '../../fund-institution/entities/fund-institution.entity';
+import { FundApplication } from '../../fund-application/entities/fund-application.entity';
 
 @Entity('User') // 对应数据库中的 User 表
 export class User {
@@ -35,4 +40,13 @@ export class User {
     inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
   })
   roles: Role[];
+
+  // 多对一关联基金机构, 使用机构ID作为外键
+  @ManyToOne(() => FundInstitution, (institution) => institution.users)
+  @JoinColumn({ name: 'institution_id' })
+  institution: FundInstitution;
+
+  // 一对多关联项目申请, 使用申请人ID作为外键
+  @OneToMany(() => FundApplication, (application) => application.applicant)
+  applications: FundApplication[];
 }

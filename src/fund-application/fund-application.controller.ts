@@ -1,35 +1,83 @@
-import { Controller, Post, Body, Param, Put, Get, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { FundApplicationService } from './fund-application.service';
 import { CreateFundApplicationDto } from './dto/create-fund-application.dto';
-import { UploadAttachmentDto } from './dto/upload-attachment.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateFundApplicationDto } from './dto/update-fund-application.dto';
+import { QueryFundApplicationDto } from './dto/query-fund-application.dto';
+import { CreateApplicationAttachmentDto } from '../application-attachment/dto/create-application-attachment.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Controller('fund-application')
+@Controller('api/applications')
+@UseGuards(JwtAuthGuard) // 保护所有接口
 export class FundApplicationController {
-  constructor(private readonly fundApplicationService: FundApplicationService) {}
+  constructor(private readonly applicationService: FundApplicationService) {}
 
-  // 创建基金项目申请
-  @UseGuards(JwtAuthGuard)
+  /**
+   * 项目申请提交
+   * POST /api/applications
+   * 可选：附件信息可通过请求体中附件字段上传
+   */
   @Post()
-  async create(@Body() createFundApplicationDto: CreateFundApplicationDto, @Param('userId') userId: number) {
-    return this.fundApplicationService.createFundApplication(createFundApplicationDto, userId);
+  async createApplication(
+    @Body() createDto: CreateFundApplicationDto,
+    // 可通过附件字段传入附件数据（如果前端将附件与申请一起提交）
+    @Body('attachments') attachments?: CreateApplicationAttachmentDto[],
+  ) {
+    return await this.applicationService.createApplication(
+      createDto,
+      attachments,
+    );
   }
 
-  // 上传附件
-  @UseGuards(JwtAuthGuard)
-  @Post(':applicationId/attachment')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadAttachment(@Param('applicationId') applicationId: number, @UploadedFile() file: Express.Multer.File) {
-    const uploadAttachmentDto: UploadAttachmentDto = { file_path: file.path, file_type: file.mimetype };
-    return this.fundApplicationService.uploadAttachment(applicationId, uploadAttachmentDto);
+  /**
+   * 申请修改与补充
+   * PUT /api/applications/:id
+   */
+  @Put(':id')
+  async updateApplication(
+    @Param('id') id: number,
+    @Body() updateDto: UpdateFundApplicationDto,
+  ) {
+    return await this.applicationService.updateApplication(id, updateDto);
   }
 
-  // 查询基金申请
-  @Get(':applicationId')
-  async get(@Param('applicationId') applicationId: number) {
-    return this.fundApplicationService.getFundApplication(applicationId);
+  /**
+   * 申请查询与跟踪
+   * GET /api/applications
+   * 支持关键字搜索、状态过滤、项目类型筛选、排序和分页
+   */
+  @Get()
+  async queryApplications(@Query() queryDto: QueryFundApplicationDto) {
+    return await this.applicationService.queryApplications(queryDto);
   }
 
-  // 更新基金项目申请
-  @Put(':application
+  /**
+   * 申请详情获取
+   * GET /api/applications/:id
+   * 根据申请ID获取详细信息，包括附件和审核记录
+   */
+  @Get(':id')
+  async getApplicationById(@Param('id') id: number) {
+    return await this.applicationService.getApplicationById(id);
+  }
+
+  /**
+   * 申请删除
+   * DELETE /api/applications/:id
+   * 删除申请时，同时清理附件和审核记录
+   */
+  @Delete(':id')
+  async deleteApplication(@Param('id') id: number) {
+    await this.applicationService.deleteApplication(id);
+    return { message: '申请删除成功' };
+  }
+}
