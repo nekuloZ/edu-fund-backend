@@ -16,7 +16,7 @@ export class Permission {
   @Column({ type: 'varchar', length: 255, nullable: true, comment: '权限描述' })
   description: string;
 
-  // 权限与角色的多对多关系
+  // 多对多：权限对应多个角色
   @ManyToMany(() => Role, (role) => role.permissions)
   roles: Role[];
 }

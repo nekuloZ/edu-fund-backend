@@ -1,52 +1,93 @@
 import {
   Entity,
-  Column,
   PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
   ManyToMany,
-  JoinTable,
-  ManyToOne,
-  JoinColumn,
   OneToMany,
+  JoinTable,
 } from 'typeorm';
 import { Role } from '../../role/entities/role.entity';
-import { FundInstitution } from '../../fund-institution/entities/fund-institution.entity';
 import { FundApplication } from '../../fund-application/entities/fund-application.entity';
+import { ReviewLog } from '../../review-log/entities/review-log.entity';
+import { DisbursementRecord } from '../../disbursement-record/entities/disbursement-record.entity';
+import { FundDynamicLog } from '../../fund-dynamic-log/entities/fund-dynamic-log.entity';
+import { FundDonation } from '../../fund-donation/entities/fund-donation.entity';
+import { Notification } from '../../notification/entities/notification.entity';
 
-@Entity('User') // 对应数据库中的 User 表
+@Entity('User')
 export class User {
-  @PrimaryGeneratedColumn({ name: 'user_id' })
-  id: number;
+  @PrimaryGeneratedColumn({ comment: '用户ID，主键' })
+  user_id: number;
 
-  @Column({ unique: true, comment: '用户名，唯一' })
+  @Column({
+    type: 'varchar',
+    length: 50,
+    unique: true,
+    comment: '用户名，唯一',
+  })
   username: string;
 
-  @Column({ comment: '加密后的密码' })
+  @Column({ type: 'varchar', length: 255, comment: '加密后的密码' })
   password: string;
 
-  @Column({ nullable: true, comment: '联系电话' })
+  @Column({ type: 'varchar', length: 20, nullable: true, comment: '联系电话' })
   phone: string;
 
-  @Column({ nullable: true, comment: '邮箱地址' })
+  @Column({ type: 'varchar', length: 100, nullable: true, comment: '邮箱地址' })
   email: string;
 
-  @Column({ nullable: true, comment: '头像URL' })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    comment: '头像URL（可选）',
+  })
   avatar: string;
 
-  // 多对多关联角色，使用中间表 User_Role 实现
+  @Column({
+    type: 'int',
+    nullable: true,
+    comment: '所属基金机构ID，外键关联Fund_Institution',
+  })
+  institution_id: number;
+
+  @Column({ type: 'tinyint', default: 1, comment: '用户状态：1-激活，0-禁用' })
+  status: number;
+
+  @CreateDateColumn({ type: 'datetime', comment: '创建时间' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'datetime', comment: '最后修改时间' })
+  updated_at: Date;
+
+  // 多对多：用户可拥有多个角色
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable({
     name: 'User_Role',
-    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
+    joinColumn: { name: 'user_id', referencedColumnName: 'user_id' },
+    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'role_id' },
   })
   roles: Role[];
 
-  // 多对一关联基金机构, 使用机构ID作为外键
-  @ManyToOne(() => FundInstitution, (institution) => institution.users)
-  @JoinColumn({ name: 'institution_id' })
-  institution: FundInstitution;
-
-  // 一对多关联项目申请, 使用申请人ID作为外键
+  // 一对多：用户作为申请者提交的申请
   @OneToMany(() => FundApplication, (application) => application.applicant)
   applications: FundApplication[];
+
+  // 一对多：用户作为审核人员审核的记录
+  @OneToMany(() => ReviewLog, (reviewLog) => reviewLog.reviewer)
+  reviewLogs: ReviewLog[];
+
+  // 一对多：用户作为拨款操作人员的拨款记录
+  @OneToMany(() => DisbursementRecord, (record) => record.operator)
+  disbursementRecords: DisbursementRecord[];
+
+  // 一对多：用户可能作为捐赠来源（例如个人捐赠时，记录捐赠者ID）
+  @OneToMany(() => FundDynamicLog, (log) => log.donationSourceDonor)
+  donationDynamicLogs: FundDynamicLog[];
+
+  // 一对多：用户接收的通知
+  @OneToMany(() => Notification, (notification) => notification.recipient)
+  notifications: Notification[];
 }

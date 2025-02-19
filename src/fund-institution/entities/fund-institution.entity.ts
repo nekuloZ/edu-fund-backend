@@ -5,8 +5,9 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
 import { FundApplication } from '../../fund-application/entities/fund-application.entity';
+import { FundDonation } from '../../fund-donation/entities/fund-donation.entity';
+import { FundDynamicLog } from '../../fund-dynamic/entities/fund-dynamic-log.entity';
 
 @Entity('Fund_Institution')
 export class FundInstitution {
@@ -19,8 +20,8 @@ export class FundInstitution {
   @Column({
     type: 'varchar',
     length: 50,
-    unique: true,
     nullable: true,
+    unique: true,
     comment: '机构编码，唯一（可选）',
   })
   institution_code: string;
@@ -43,11 +44,18 @@ export class FundInstitution {
   @CreateDateColumn({ type: 'datetime', comment: '创建时间' })
   created_at: Date;
 
-  // 一个基金机构下的多个用户
-  @OneToMany(() => User, (user) => user.institution)
-  users: User[];
-
-  // 一个基金机构下的多个项目申请
+  // 一对多：机构下的项目申请
   @OneToMany(() => FundApplication, (application) => application.institution)
   applications: FundApplication[];
+
+  // 一对多：机构下的捐赠记录
+  @OneToMany(() => FundDonation, (donation) => donation.fundInstitution)
+  donations: FundDonation[];
+
+  // 一对多：机构作为资金动态日志中拨款或捐赠来源
+  @OneToMany(() => FundDynamicLog, (log) => log.donationSourceInstitution)
+  donationDynamicLogs: FundDynamicLog[];
+
+  @OneToMany(() => FundDynamicLog, (log) => log.disbursementSource)
+  disbursementDynamicLogs: FundDynamicLog[];
 }

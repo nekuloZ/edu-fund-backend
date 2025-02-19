@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToMany,
-  JoinTable,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Permission } from '../../permission/entities/permission.entity';
 
@@ -16,26 +10,18 @@ export class Role {
   @Column({
     type: 'varchar',
     length: 50,
-    comment: '角色名称，如admin、user、student等',
+    comment: '角色名称，如 admin、user、student 等',
   })
   role_name: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true, comment: '角色描述' })
   description: string;
 
-  // 角色与用户的多对多关系
+  // 多对多：角色对应多个用户
   @ManyToMany(() => User, (user) => user.roles)
   users: User[];
 
-  // 角色与权限的多对多关系，通过Role_Permission中间表
+  // 多对多：角色对应多个权限，通过中间表 Role_Permission 实现
   @ManyToMany(() => Permission, (permission) => permission.roles)
-  @JoinTable({
-    name: 'Role_Permission',
-    joinColumn: { name: 'role_id', referencedColumnName: 'role_id' },
-    inverseJoinColumn: {
-      name: 'permission_id',
-      referencedColumnName: 'permission_id',
-    },
-  })
   permissions: Permission[];
 }

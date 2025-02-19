@@ -85,6 +85,7 @@ export class FundApplicationService {
   /**
    * 查询项目申请列表
    * 支持关键字搜索、状态过滤、项目类型筛选、排序和分页
+   * 使用 QueryBuilder 查询
    */
   async queryApplications(
     queryDto: QueryFundApplicationDto,

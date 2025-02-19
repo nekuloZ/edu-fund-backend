@@ -15,6 +15,7 @@ import { RolePermissionModule } from './role-permission/role-permission.module';
 import { AuthModule } from './auth/auth.module';
 import { FundDonationModule } from './fund-donation/fund-donation.module';
 import { FundDynamicLogModule } from './fund-dynamic-log/fund-dynamic-log.module';
+import { FundProjectModule } from './fund-project/fund-project.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { FundDynamicLogModule } from './fund-dynamic-log/fund-dynamic-log.module
     RolePermissionModule,
     FundDonationModule,
     FundDynamicLogModule,
+    FundProjectModule,
   ],
   controllers: [AppController],
   providers: [AppService],
