@@ -16,6 +16,9 @@ import { AuthModule } from './auth/auth.module';
 import { FundDonationModule } from './fund-donation/fund-donation.module';
 import { FundDynamicLogModule } from './fund-dynamic-log/fund-dynamic-log.module';
 import { FundProjectModule } from './fund-project/fund-project.module';
+import { FundProjectTypeModule } from './fund-project-type/fund-project-type.module';
+import { ApplicationStatusModule } from './application-status/application-status.module';
+import { TierModule } from './tier/tier.module';
 
 @Module({
   imports: [
@@ -44,6 +47,9 @@ import { FundProjectModule } from './fund-project/fund-project.module';
     FundDonationModule,
     FundDynamicLogModule,
     FundProjectModule,
+    FundProjectTypeModule,
+    ApplicationStatusModule,
+    TierModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,8 +2,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
   ManyToOne,
+  CreateDateColumn,
 } from 'typeorm';
 import { FundApplication } from '../../fund-application/entities/fund-application.entity';
 import { User } from '../../user/entities/user.entity';
@@ -13,13 +13,25 @@ export class ReviewLog {
   @PrimaryGeneratedColumn({ comment: '审核记录ID，主键' })
   review_id: number;
 
-  @ManyToOne(() => FundApplication, (application) => application.reviews, {
+  // 多对一：审核记录对应一个申请
+  @ManyToOne(() => FundApplication, (application) => application.reviewLogs, {
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   application: FundApplication;
 
-  @ManyToOne(() => User, (user) => user.reviews, { onDelete: 'CASCADE' })
+  @Column({ type: 'int', comment: '申请ID', name: 'application_id' })
+  application_id: number;
+
+  // 多对一：审核记录对应一个审核人员（用户）
+  @ManyToOne(() => User, (user) => user.reviewLogs, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   reviewer: User;
+
+  @Column({ type: 'int', comment: '审核人员ID', name: 'reviewer_id' })
+  reviewer_id: number;
 
   @Column({ type: 'tinyint', comment: '审核阶段，例如1-初审，2-复审' })
   review_stage: number;

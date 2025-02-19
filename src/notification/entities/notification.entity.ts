@@ -12,9 +12,6 @@ export class Notification {
   @PrimaryGeneratedColumn({ comment: '通知ID，主键' })
   notification_id: number;
 
-  @ManyToOne(() => User, (user) => user.notifications, { onDelete: 'CASCADE' })
-  recipient: User;
-
   @Column({ type: 'varchar', length: 100, comment: '通知标题' })
   title: string;
 
@@ -39,4 +36,11 @@ export class Notification {
     comment: '消息类型，如系统消息、邮件、短信（可选）',
   })
   message_type: string;
+
+  // 多对一：通知接收者（用户）
+  @ManyToOne(() => User, (user) => user.notifications, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  recipient: User;
 }

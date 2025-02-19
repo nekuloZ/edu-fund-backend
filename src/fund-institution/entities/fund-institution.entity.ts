@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { FundApplication } from '../../fund-application/entities/fund-application.entity';
 import { FundDonation } from '../../fund-donation/entities/fund-donation.entity';
-import { FundDynamicLog } from '../../fund-dynamic/entities/fund-dynamic-log.entity';
+import { FundDynamicLog } from '../../fund-dynamic-log/entities/fund-dynamic-log.entity';
 
 @Entity('Fund_Institution')
 export class FundInstitution {
