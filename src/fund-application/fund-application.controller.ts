@@ -1,83 +1,72 @@
 import {
   Controller,
-  Get,
   Post,
-  Put,
-  Delete,
-  Param,
   Body,
+  Put,
+  Param,
+  Get,
   Query,
-  UseGuards,
+  Delete,
+  Patch,
 } from '@nestjs/common';
 import { FundApplicationService } from './fund-application.service';
 import { CreateFundApplicationDto } from './dto/create-fund-application.dto';
+import { CreateApplicationAttachmentDto } from '../application-attachment/dto/create-application-attachment.dto';
 import { UpdateFundApplicationDto } from './dto/update-fund-application.dto';
 import { QueryFundApplicationDto } from './dto/query-fund-application.dto';
-import { CreateApplicationAttachmentDto } from '../application-attachment/dto/create-application-attachment.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Controller('api/applications')
-@UseGuards(JwtAuthGuard) // 保护所有接口
+@Controller('fund-application')
 export class FundApplicationController {
-  constructor(private readonly applicationService: FundApplicationService) {}
+  constructor(
+    private readonly fundApplicationService: FundApplicationService,
+  ) {}
 
-  /**
-   * 项目申请提交
-   * POST /api/applications
-   * 可选：附件信息可通过请求体中附件字段上传
-   */
+  // 申请提交接口：POST /fund-application
   @Post()
-  async createApplication(
-    @Body() createDto: CreateFundApplicationDto,
-    // 可通过附件字段传入附件数据（如果前端将附件与申请一起提交）
-    @Body('attachments') attachments?: CreateApplicationAttachmentDto[],
+  async create(@Body() createDto: CreateFundApplicationDto) {
+    return await this.fundApplicationService.create(createDto);
+  }
+
+  // 附件上传接口：POST /fund-application/attachment
+  @Post('attachment')
+  async createAttachment(
+    @Body() createAttachmentDto: CreateApplicationAttachmentDto,
   ) {
-    return await this.applicationService.createApplication(
-      createDto,
-      attachments,
+    return await this.fundApplicationService.createAttachment(
+      createAttachmentDto,
     );
   }
 
-  /**
-   * 申请修改与补充
-   * PUT /api/applications/:id
-   */
+  // 申请修改接口：PUT /fund-application/:id
   @Put(':id')
-  async updateApplication(
+  async update(
     @Param('id') id: number,
     @Body() updateDto: UpdateFundApplicationDto,
   ) {
-    return await this.applicationService.updateApplication(id, updateDto);
+    return await this.fundApplicationService.update(id, updateDto);
   }
 
-  /**
-   * 申请查询与跟踪
-   * GET /api/applications
-   * 支持关键字搜索、状态过滤、项目类型筛选、排序和分页
-   */
+  // 申请查询接口：GET /fund-application?keyword=&status=&page=&limit=
   @Get()
-  async queryApplications(@Query() queryDto: QueryFundApplicationDto) {
-    return await this.applicationService.queryApplications(queryDto);
+  async findAll(@Query() queryDto: QueryFundApplicationDto) {
+    return await this.fundApplicationService.findAll(queryDto);
   }
 
-  /**
-   * 申请详情获取
-   * GET /api/applications/:id
-   * 根据申请ID获取详细信息，包括附件和审核记录
-   */
+  // 申请详情获取接口：GET /fund-application/:id
   @Get(':id')
-  async getApplicationById(@Param('id') id: number) {
-    return await this.applicationService.getApplicationById(id);
+  async findOne(@Param('id') id: number) {
+    return await this.fundApplicationService.findOne(id);
   }
 
-  /**
-   * 申请删除
-   * DELETE /api/applications/:id
-   * 删除申请时，同时清理附件和审核记录
-   */
+  // 申请删除接口：DELETE /fund-application/:id
   @Delete(':id')
-  async deleteApplication(@Param('id') id: number) {
-    await this.applicationService.deleteApplication(id);
-    return { message: '申请删除成功' };
+  async remove(@Param('id') id: number) {
+    return await this.fundApplicationService.remove(id);
+  }
+
+  // 申请状态更新接口：PATCH /fund-application/:id/status
+  @Patch(':id/status')
+  async updateStatus(@Param('id') id: number, @Body('status') status: string) {
+    return await this.fundApplicationService.updateStatus(id, status);
   }
 }

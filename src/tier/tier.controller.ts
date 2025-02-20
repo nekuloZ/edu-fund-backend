@@ -1,34 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { TierService } from './tier.service';
 import { CreateTierDto } from './dto/create-tier.dto';
 import { UpdateTierDto } from './dto/update-tier.dto';
+import { QueryTierDto } from './dto/query-tier.dto';
 
-@Controller('tier')
+@Controller('tiers')
 export class TierController {
   constructor(private readonly tierService: TierService) {}
 
+  // POST /api/tiers
+  // 创建新的奖学金档次，调用 Service 的 create 方法
   @Post()
-  create(@Body() createTierDto: CreateTierDto) {
-    return this.tierService.create(createTierDto);
+  async create(@Body() createDto: CreateTierDto) {
+    return await this.tierService.create(createDto);
   }
 
+  // GET /api/tiers
+  // 查询档次列表，支持关键字搜索、分页和排序
   @Get()
-  findAll() {
-    return this.tierService.findAll();
+  async findAll(@Query() queryDto: QueryTierDto) {
+    return await this.tierService.findAll(queryDto);
   }
 
+  // GET /api/tiers/:id
+  // 根据档次 ID 获取档次详情
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tierService.findOne(+id);
+  async findOne(@Param('id') id: number) {
+    return await this.tierService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTierDto: UpdateTierDto) {
-    return this.tierService.update(+id, updateTierDto);
+  // PUT /api/tiers/:id
+  // 更新已有档次信息
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() updateDto: UpdateTierDto) {
+    return await this.tierService.update(id, updateDto);
   }
 
+  // DELETE /api/tiers/:id
+  // 删除档次，调用 Service 的 remove 方法
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tierService.remove(+id);
+  async remove(@Param('id') id: number) {
+    return await this.tierService.remove(id);
   }
 }

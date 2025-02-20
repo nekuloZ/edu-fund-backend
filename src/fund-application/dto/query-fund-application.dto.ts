@@ -1,39 +1,22 @@
-import { IsOptional, IsString, IsNumber, Min, IsEnum } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ProjectType } from './create-fund-application.dto';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class QueryFundApplicationDto {
-  // 搜索关键字（用于匹配标题、描述或申请人信息）
+  // 支持关键字搜索（可在标题、描述等字段中匹配）
   @IsOptional()
   @IsString()
-  q?: string;
+  keyword?: string;
 
-  // 按申请状态过滤，如 submitted、pending_review、approved、rejected、needs_revision
+  // 根据申请状态进行过滤，例如 submitted、pending_review、approved、rejected
   @IsOptional()
   @IsString()
   status?: string;
 
-  // 按项目类型筛选
+  // 分页参数：页码与每页记录数
   @IsOptional()
-  @IsEnum(ProjectType)
-  project_type?: ProjectType;
-
-  // 当前页码（最小值为 1）
-  @IsOptional()
-  @Type(() => Number)
   @IsNumber()
-  @Min(1)
-  page?: number = 1;
+  page?: number;
 
-  // 每页条数（最小值为 1）
   @IsOptional()
-  @Type(() => Number)
   @IsNumber()
-  @Min(1)
-  limit?: number = 10;
-
-  // 排序字段，例如 "submission_date:desc" 或 "amount_requested:asc"
-  @IsOptional()
-  @IsString()
-  sort?: string;
+  limit?: number;
 }

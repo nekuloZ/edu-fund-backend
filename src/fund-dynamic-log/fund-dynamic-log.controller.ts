@@ -1,34 +1,57 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Put,
+  Get,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { FundDynamicLogService } from './fund-dynamic-log.service';
 import { CreateFundDynamicLogDto } from './dto/create-fund-dynamic-log.dto';
 import { UpdateFundDynamicLogDto } from './dto/update-fund-dynamic-log.dto';
+import { QueryFundDynamicLogDto } from './dto/query-fund-dynamic-log.dto';
 
-@Controller('fund-dynamic-log')
+@Controller('fund-dynamic-logs')
 export class FundDynamicLogController {
   constructor(private readonly fundDynamicLogService: FundDynamicLogService) {}
 
+  // POST /api/fund-dynamic-logs
+  // 创建资金动态日志记录
   @Post()
-  create(@Body() createFundDynamicLogDto: CreateFundDynamicLogDto) {
-    return this.fundDynamicLogService.create(createFundDynamicLogDto);
+  async create(@Body() createDto: CreateFundDynamicLogDto) {
+    return await this.fundDynamicLogService.create(createDto);
   }
 
+  // PUT /api/fund-dynamic-logs/:id
+  // 更新资金动态日志记录
+  @Put(':id')
+  async update(
+    @Param('id') id: number,
+    @Body() updateDto: UpdateFundDynamicLogDto,
+  ) {
+    return await this.fundDynamicLogService.update(id, updateDto);
+  }
+
+  // GET /api/fund-dynamic-logs
+  // 查询资金动态日志列表，支持多条件筛选、分页和排序
   @Get()
-  findAll() {
-    return this.fundDynamicLogService.findAll();
+  async findAll(@Query() queryDto: QueryFundDynamicLogDto) {
+    return await this.fundDynamicLogService.findAll(queryDto);
   }
 
+  // GET /api/fund-dynamic-logs/:id
+  // 根据日志ID获取资金动态日志详情
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.fundDynamicLogService.findOne(+id);
+  async findOne(@Param('id') id: number) {
+    return await this.fundDynamicLogService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFundDynamicLogDto: UpdateFundDynamicLogDto) {
-    return this.fundDynamicLogService.update(+id, updateFundDynamicLogDto);
-  }
-
+  // DELETE /api/fund-dynamic-logs/:id
+  // 删除资金动态日志记录
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.fundDynamicLogService.remove(+id);
+  async remove(@Param('id') id: number) {
+    return await this.fundDynamicLogService.remove(id);
   }
 }

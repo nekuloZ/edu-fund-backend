@@ -1,29 +1,31 @@
-import { IsString, IsNotEmpty, IsNumber, IsEnum } from 'class-validator';
-
-export enum ProjectType {
-  PUBLIC_POOL = 'public_pool',
-  SCHOLARSHIP = 'scholarship',
-  GRANT = 'grant',
-}
+import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateFundApplicationDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   title: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   description: string;
 
+  @IsNotEmpty()
   @IsNumber()
-  @IsNotEmpty()
-  amount_requested: number;
+  amountRequested: number;
 
+  @IsNotEmpty()
   @IsString()
-  @IsNotEmpty()
-  use_plan: string;
+  usePlan: string;
 
-  @IsEnum(ProjectType)
   @IsNotEmpty()
-  project_type: ProjectType;
+  @IsNumber()
+  projectTypeId: number;
+
+  @IsOptional()
+  @IsNumber()
+  applicantId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  institutionId?: number;
 }

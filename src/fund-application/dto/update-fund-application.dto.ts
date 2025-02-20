@@ -1,24 +1,25 @@
-import { IsString, IsOptional, IsNumber, IsEnum } from 'class-validator';
-import { ProjectType } from './create-fund-application.dto';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class UpdateFundApplicationDto {
-  @IsString()
+  // 允许在申请状态为 submitted 或 pending_review 时修改的字段
+
   @IsOptional()
+  @IsString()
   title?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   description?: string;
 
+  @IsOptional()
   @IsNumber()
-  @IsOptional()
-  amount_requested?: number;
+  amountRequested?: number;
 
+  @IsOptional()
   @IsString()
-  @IsOptional()
-  use_plan?: string;
+  usePlan?: string;
 
-  @IsEnum(ProjectType)
   @IsOptional()
-  project_type?: ProjectType;
+  @IsNumber()
+  projectTypeId: number;
 }

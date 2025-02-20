@@ -4,9 +4,12 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { FundApplication } from '../../fund-application/entities/fund-application.entity';
+import { FundProjectType } from '../../fund-project-type/entities/fund-project-type.entity';
 
 @Entity('Fund_Project')
 export class FundProject {
@@ -44,6 +47,11 @@ export class FundProject {
 
   @UpdateDateColumn({ type: 'datetime', comment: '最后修改时间' })
   updated_at: Date;
+
+  // 可选：直接关联项目类型
+  @ManyToOne(() => FundProjectType, { nullable: true })
+  @JoinColumn({ name: 'project_type_id' })
+  projectType: FundProjectType;
 
   // 一对多：项目下的申请记录
   @OneToMany(() => FundApplication, (application) => application.project)
