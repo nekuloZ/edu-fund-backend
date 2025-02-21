@@ -1,34 +1,57 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Put,
+  Get,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { QueryNotificationDto } from './dto/query-notification.dto';
 
-@Controller('notification')
+@Controller('notifications')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
+  // POST /api/notifications
+  // 创建新的系统通知
   @Post()
-  create(@Body() createNotificationDto: CreateNotificationDto) {
-    return this.notificationService.create(createNotificationDto);
+  async create(@Body() createDto: CreateNotificationDto) {
+    return await this.notificationService.create(createDto);
   }
 
+  // PUT /api/notifications/:id
+  // 更新通知状态或内容
+  @Put(':id')
+  async update(
+    @Param('id') id: number,
+    @Body() updateDto: UpdateNotificationDto,
+  ) {
+    return await this.notificationService.update(id, updateDto);
+  }
+
+  // GET /api/notifications
+  // 查询通知列表，支持多条件筛选、排序和分页
   @Get()
-  findAll() {
-    return this.notificationService.findAll();
+  async findAll(@Query() queryDto: QueryNotificationDto) {
+    return await this.notificationService.findAll(queryDto);
   }
 
+  // GET /api/notifications/:id
+  // 根据通知ID获取通知详情
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.notificationService.findOne(+id);
+  async findOne(@Param('id') id: number) {
+    return await this.notificationService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
-    return this.notificationService.update(+id, updateNotificationDto);
-  }
-
+  // DELETE /api/notifications/:id
+  // 删除通知记录
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.notificationService.remove(+id);
+  async remove(@Param('id') id: number) {
+    return await this.notificationService.remove(id);
   }
 }
