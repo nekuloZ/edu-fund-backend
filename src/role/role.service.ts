@@ -2,15 +2,16 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
 import { Role } from './entities/role.entity';
-import { Repository } from 'typeorm';
+import { Permission } from '../permission/entities/permission.entity';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { QueryRoleDto } from './dto/query-role.dto';
 import { AssignPermissionDto } from './dto/assign-permission.dto';
-import { Permission } from '../permission/entities/permission.entity'; // 假设 Permission 实体在 src/permission/permission.entity.ts
 
 @Injectable()
 export class RoleService {
@@ -22,103 +23,153 @@ export class RoleService {
   ) {}
 
   /**
-   * 角色列表查询
-   * 支持搜索（按角色名称）、排序和分页
+   * 创建角色
    */
-  async queryRoles(
-    queryDto: QueryRoleDto,
-  ): Promise<{ data: Role[]; total: number }> {
-    const { q, page = 1, limit = 10, sort } = queryDto;
-    // 使用 QueryBuilder 构建查询语句
-    const query = this.roleRepository.createQueryBuilder('role');
-
-    // 如果传入搜索关键字，则根据角色名称进行模糊查询
-    if (q) {
-      query.where('role.role_name LIKE :q', { q: `%${q}%` });
-    }
-
-    // 如果传入排序参数，格式为 "field:direction" 例如 "role_name:asc"
-    if (sort) {
-      const [field, order] = sort.split(':');
-      // 注意：这里假设传入的字段名称是合法的
-      query.orderBy(`role.${field}`, order.toUpperCase() as 'ASC' | 'DESC');
-    }
-
-    // 分页处理：跳过前面的记录，并限制返回数量
-    query.skip((page - 1) * limit).take(limit);
-
-    // 执行查询，返回数据和总记录数
-    const [data, total] = await query.getManyAndCount();
-    return { data, total };
-  }
-
-  /**
-   * 根据角色 ID 获取角色详情，同时加载该角色关联的权限数据
-   */
-  async getRoleById(id: number): Promise<Role> {
-    const role = await this.roleRepository.findOne({
-      where: { role_id: id },
-      relations: ['permissions'], // 加载与角色关联的权限数据
+  async create(createRoleDto: CreateRoleDto): Promise<Role> {
+    // 检查角色名是否已存在
+    const existingRole = await this.roleRepository.findOne({
+      where: { name: createRoleDto.name },
     });
-    if (!role) {
-      throw new NotFoundException(`Role with ID ${id} not found`);
-    }
-    return role;
-  }
 
-  /**
-   * 创建新角色
-   * 根据传入的 CreateRoleDto 创建并保存新角色记录
-   */
-  async createRole(createRoleDto: CreateRoleDto): Promise<Role> {
-    const role = this.roleRepository.create(createRoleDto);
+    if (existingRole) {
+      throw new ConflictException('角色名称已存在');
+    }
+
+    // 创建角色实例
+    const role = this.roleRepository.create({
+      name: createRoleDto.name,
+      description: createRoleDto.description,
+      isActive: createRoleDto.isActive ?? true,
+    });
+
+    // 如果提供了权限ID，则关联权限
+    if (createRoleDto.permissionIds && createRoleDto.permissionIds.length > 0) {
+      const permissions = await this.permissionRepository.findBy({
+        id: In(createRoleDto.permissionIds),
+      });
+
+      if (permissions.length !== createRoleDto.permissionIds.length) {
+        throw new BadRequestException('部分权限ID不存在');
+      }
+
+      role.permissions = permissions;
+    }
+
+    // 保存角色
     return await this.roleRepository.save(role);
   }
 
   /**
-   * 更新角色信息
-   * 根据角色 ID 更新角色的名称、描述等信息
+   * 查询所有角色
    */
-  async updateRole(id: number, updateRoleDto: UpdateRoleDto): Promise<Role> {
-    const role = await this.getRoleById(id);
-    // 将传入的更新数据合并到现有角色对象中
+  async findAll(queryRoleDto: QueryRoleDto): Promise<{
+    items: Role[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const { page = 1, limit = 10, keyword, isActive } = queryRoleDto;
+
+    // 构建查询
+    const queryBuilder = this.roleRepository
+      .createQueryBuilder('role')
+      .leftJoinAndSelect('role.permissions', 'permission')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    // 添加过滤条件
+    if (keyword) {
+      queryBuilder.andWhere(
+        '(role.name LIKE :keyword OR role.description LIKE :keyword)',
+        { keyword: `%${keyword}%` },
+      );
+    }
+
+    if (isActive !== undefined) {
+      queryBuilder.andWhere('role.isActive = :isActive', { isActive });
+    }
+
+    // 排序
+    queryBuilder.orderBy('role.createdAt', 'DESC');
+
+    // 执行查询
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  /**
+   * 根据ID查找角色
+   */
+  async findById(id: number): Promise<Role> {
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['permissions'],
+    });
+
+    if (!role) {
+      throw new NotFoundException(`角色ID ${id} 不存在`);
+    }
+
+    return role;
+  }
+
+  /**
+   * 更新角色信息
+   */
+  async update(id: number, updateRoleDto: UpdateRoleDto): Promise<Role> {
+    const role = await this.findById(id);
+
+    // 如果要更新名称，检查名称是否已存在
+    if (updateRoleDto.name && updateRoleDto.name !== role.name) {
+      const existingRole = await this.roleRepository.findOne({
+        where: { name: updateRoleDto.name },
+      });
+
+      if (existingRole) {
+        throw new ConflictException('角色名称已存在');
+      }
+    }
+
+    // 更新角色属性
     Object.assign(role, updateRoleDto);
+
+    // 保存更新
     return await this.roleRepository.save(role);
   }
 
   /**
    * 删除角色
-   * 删除角色时需要级联删除与用户和权限的关联记录，确保数据一致性
    */
-  async deleteRole(id: number): Promise<void> {
-    const role = await this.getRoleById(id);
-    // 直接调用 remove 方法，TypeORM 会根据实体关系配置自动处理级联删除
+  async remove(id: number): Promise<void> {
+    const role = await this.findById(id);
     await this.roleRepository.remove(role);
   }
 
   /**
-   * 角色与权限关联管理
-   * 为指定角色分配权限（支持增加或移除权限），
-   * assignPermissionDto 中传入权限 ID 数组
+   * 为角色分配权限
    */
   async assignPermissions(
-    roleId: number,
+    id: number,
     assignPermissionDto: AssignPermissionDto,
   ): Promise<Role> {
-    const role = await this.getRoleById(roleId);
-    if (!role) {
-      throw new NotFoundException(`Role with ID ${roleId} not found`);
+    const role = await this.findById(id);
+
+    // 查找权限
+    const permissions = await this.permissionRepository.findBy({
+      id: In(assignPermissionDto.permissionIds),
+    });
+
+    if (permissions.length !== assignPermissionDto.permissionIds.length) {
+      throw new BadRequestException('部分权限ID不存在');
     }
-    // 根据传入的权限ID数组查找对应的权限记录
-    const permissions = await this.permissionRepository.findByIds(
-      assignPermissionDto.permissionIds,
-    );
-    if (permissions.length === 0) {
-      throw new BadRequestException(
-        'No valid permissions found for provided IDs',
-      );
-    }
-    // 更新角色的权限关联
+
+    // 更新角色权限
     role.permissions = permissions;
     return await this.roleRepository.save(role);
   }

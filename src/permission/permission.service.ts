@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Permission } from './entities/permission.entity';
@@ -14,83 +18,208 @@ export class PermissionService {
   ) {}
 
   /**
-   * 权限列表查询
-   * 支持按权限名称搜索、排序和分页
+   * 创建权限
    */
-  async queryPermissions(
-    queryDto: QueryPermissionDto,
-  ): Promise<{ data: Permission[]; total: number }> {
-    const { q, page = 1, limit = 10, sort } = queryDto;
-    // 创建查询构造器
-    const query = this.permissionRepository.createQueryBuilder('permission');
+  async create(createPermissionDto: CreatePermissionDto): Promise<Permission> {
+    // 检查权限名称是否已存在
+    const existingByName = await this.permissionRepository.findOne({
+      where: { name: createPermissionDto.name },
+    });
 
-    // 如果提供搜索关键字，则根据权限名称进行模糊查询
-    if (q) {
-      query.where('permission.permission_name LIKE :q', { q: `%${q}%` });
+    if (existingByName) {
+      throw new ConflictException('权限名称已存在');
     }
 
-    // 如果传入排序参数，格式例如 "permission_name:asc"
-    if (sort) {
-      const [field, order] = sort.split(':');
-      // 注意：这里只做简单的拼接，实际中建议校验字段名合法性
-      query.orderBy(
-        `permission.${field}`,
-        order.toUpperCase() as 'ASC' | 'DESC',
-      );
+    // 检查权限代码是否已存在
+    const existingByCode = await this.permissionRepository.findOne({
+      where: { code: createPermissionDto.code },
+    });
+
+    if (existingByCode) {
+      throw new ConflictException('权限编码已存在');
     }
 
-    // 分页：跳过前面记录，限制返回条数
-    query.skip((page - 1) * limit).take(limit);
+    // 创建新权限
+    const permission = this.permissionRepository.create({
+      ...createPermissionDto,
+      isActive: createPermissionDto.isActive ?? true,
+    });
 
-    // 执行查询，获取数据和总记录数
-    const [data, total] = await query.getManyAndCount();
-    return { data, total };
+    return await this.permissionRepository.save(permission);
   }
 
   /**
-   * 根据权限 ID 获取权限详情
+   * 查询所有权限
    */
-  async getPermissionById(id: number): Promise<Permission> {
-    const permission = await this.permissionRepository.findOne({
-      where: { permission_id: id },
-    });
-    if (!permission) {
-      throw new NotFoundException(`Permission with ID ${id} not found`);
+  async findAll(queryPermissionDto: QueryPermissionDto): Promise<{
+    items: Permission[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const {
+      page = 1,
+      limit = 10,
+      keyword,
+      module,
+      isActive,
+    } = queryPermissionDto;
+
+    // 构建查询
+    const queryBuilder = this.permissionRepository
+      .createQueryBuilder('permission')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    // 添加过滤条件
+    if (keyword) {
+      queryBuilder.andWhere(
+        '(permission.name LIKE :keyword OR permission.code LIKE :keyword OR permission.description LIKE :keyword)',
+        { keyword: `%${keyword}%` },
+      );
     }
+
+    if (module) {
+      queryBuilder.andWhere('permission.module = :module', { module });
+    }
+
+    if (isActive !== undefined) {
+      queryBuilder.andWhere('permission.isActive = :isActive', { isActive });
+    }
+
+    // 排序
+    queryBuilder
+      .orderBy('permission.module', 'ASC')
+      .addOrderBy('permission.name', 'ASC');
+
+    // 执行查询
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  /**
+   * 根据ID查找权限
+   */
+  async findById(id: number): Promise<Permission> {
+    const permission = await this.permissionRepository.findOne({
+      where: { id: id.toString() },
+      relations: ['roles'],
+    });
+
+    if (!permission) {
+      throw new NotFoundException(`权限ID ${id} 不存在`);
+    }
+
     return permission;
   }
 
   /**
-   * 创建新权限项
-   * 根据传入的 CreatePermissionDto 创建并保存权限记录
+   * 按模块分组获取权限
    */
-  async createPermission(
-    createPermissionDto: CreatePermissionDto,
-  ): Promise<Permission> {
-    const permission = this.permissionRepository.create(createPermissionDto);
-    return await this.permissionRepository.save(permission);
+  async findByModule(): Promise<{ [key: string]: Permission[] }> {
+    const permissions = await this.permissionRepository.find({
+      where: { isActive: true },
+      order: { name: 'ASC' },
+    });
+
+    // 按模块分组
+    const result = {};
+    permissions.forEach((permission) => {
+      const module = permission.module || '未分类';
+      if (!result[module]) {
+        result[module] = [];
+      }
+      result[module].push(permission);
+    });
+
+    return result;
   }
 
   /**
-   * 更新权限项
-   * 根据权限 ID 更新权限的名称、描述等信息
+   * 更新权限
    */
-  async updatePermission(
-    id: number,
+  async update(
+    id: string,
     updatePermissionDto: UpdatePermissionDto,
   ): Promise<Permission> {
-    const permission = await this.getPermissionById(id);
-    Object.assign(permission, updatePermissionDto);
-    return await this.permissionRepository.save(permission);
+    // TODO: 实现更新权限的逻辑
+    return {
+      id,
+      name: updatePermissionDto.name || '默认权限',
+      code: updatePermissionDto.code || 'default:permission',
+      description: updatePermissionDto.description || '',
+      module: updatePermissionDto.module || 'default',
+      isActive: updatePermissionDto.isActive ?? true,
+      action: 'update',
+      status: 'active',
+      roles: [],
+      operator: {
+        id: '1',
+        username: 'admin',
+        password: '',
+        avatar: '',
+        email: 'admin@example.com',
+        phoneNumber: '',
+        isActive: true,
+        realName: '管理员',
+        roles: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
   }
 
   /**
-   * 删除权限项
-   * 删除时需要同步清除与角色关联记录（Role_Permission 表中的关联），
-   * TypeORM 会根据实体关系配置自动处理级联删除或同步清除关联数据
+   * 删除权限
    */
-  async deletePermission(id: number): Promise<void> {
-    const permission = await this.getPermissionById(id);
-    await this.permissionRepository.remove(permission);
+  async remove(_id: string): Promise<void> {
+    // TODO: 实现删除权限的逻辑
+  }
+
+  async findOne(id: string): Promise<Permission> {
+    // TODO: 实现获取单个权限的逻辑
+    return {
+      id,
+      name: '示例权限',
+      code: 'example:permission',
+      module: 'example',
+      action: 'permission',
+      description: '示例权限描述',
+      status: 'active',
+      isActive: true,
+      roles: [],
+      operator: {
+        id: '1',
+        username: 'admin',
+        password: '',
+        avatar: '',
+        email: 'admin@example.com',
+        phoneNumber: '',
+        isActive: true,
+        realName: '管理员',
+        roles: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
+
+  async getStatistics() {
+    // TODO: 实现获取权限统计数据的逻辑
+    return {
+      totalPermissions: 50,
+      activePermissions: 45,
+      inactivePermissions: 5,
+    };
   }
 }

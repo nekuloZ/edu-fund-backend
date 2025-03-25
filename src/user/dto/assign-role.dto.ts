@@ -1,9 +1,14 @@
-import { IsArray, ArrayNotEmpty, IsInt } from 'class-validator';
+import { IsArray, ArrayNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class AssignRoleDto {
-  // 传入的角色ID数组不能为空，且每个角色ID必须是整数
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsInt({ each: true })
-  roleIds: number[];
+  @ApiProperty({
+    description: '角色名称数组',
+    type: [String],
+    example: ['admin', 'editor', 'user'],
+  })
+  @IsArray({ message: '角色必须是数组' })
+  @ArrayNotEmpty({ message: '角色数组不能为空' })
+  @IsString({ each: true, message: '角色名称必须是字符串' })
+  roles: string[];
 }

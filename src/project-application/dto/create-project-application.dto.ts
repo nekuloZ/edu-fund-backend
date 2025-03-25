@@ -1,0 +1,31 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNumber, IsOptional, IsArray } from 'class-validator';
+import { CreateApplicationDto } from './create-application.dto';
+
+export class CreateProjectApplicationDto extends CreateApplicationDto {
+  @ApiProperty({ description: '项目名称' })
+  @IsString()
+  projectName: string;
+
+  @ApiProperty({ description: '项目描述' })
+  @IsString()
+  description: string;
+
+  @ApiProperty({ description: '目标金额' })
+  @IsNumber()
+  targetAmount: number;
+
+  @ApiProperty({ description: '开始日期' })
+  @IsString()
+  startDate: string;
+
+  @ApiProperty({ description: '结束日期' })
+  @IsString()
+  endDate: string;
+
+  @ApiProperty({ description: '项目类别', required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  categories?: string[];
+}

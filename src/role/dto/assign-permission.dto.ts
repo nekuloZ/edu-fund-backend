@@ -1,12 +1,14 @@
 import { IsArray, ArrayNotEmpty, IsInt } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-/**
- * 用于为角色分配权限，
- * 接收一个权限ID数组，不能为空。
- */
 export class AssignPermissionDto {
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsInt({ each: true })
+  @ApiProperty({
+    description: '权限ID数组',
+    type: [Number],
+    example: [1, 2, 3],
+  })
+  @IsArray({ message: '权限ID必须是数组' })
+  @ArrayNotEmpty({ message: '权限ID数组不能为空' })
+  @IsInt({ each: true, message: '权限ID必须是整数' })
   permissionIds: number[];
 }

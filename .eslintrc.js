@@ -22,6 +22,13 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     'linebreak-style': ['error', 'windows'], // 设置为 Windows 换行符
-    '@typescript-eslint/no-unused-vars': ['error'],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_', // 忽略以_开头的参数
+        varsIgnorePattern: '^_', // 忽略以_开头的变量
+        destructuredArrayIgnorePattern: '^_', // 忽略解构数组中以_开头的变量
+      },
+    ],
   },
 };

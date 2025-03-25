@@ -1,18 +1,38 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { UserModule } from '../user/user.module';
 import { JwtStrategy } from './jwt-strategy';
+import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: 'your_jwt_secret_key', // 设置 JWT 密钥
-      signOptions: { expiresIn: '60s' }, // 设置 JWT 过期时间
+    ConfigModule, // 导入ConfigModule以使ConfigService可用
+    UserModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret:
+          configService.get<string>('JWT_SECRET') || 'hard_coded_secret_key',
+        signOptions: { expiresIn: '24h' },
+      }),
+      inject: [ConfigService],
     }),
-    UserModule, // 引入用户模块
   ],
-  providers: [JwtStrategy, JwtAuthGuard], // 提供 JwtStrategy 和 JwtAuthGuard
-  exports: [JwtAuthGuard], // 导出 JwtAuthGuard 供其他模块使用
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    LocalStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+  ],
+  exports: [AuthService, JwtAuthGuard, RolesGuard], // 导出服务和守卫供其他模块使用
 })
 export class AuthModule {}

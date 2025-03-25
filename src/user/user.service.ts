@@ -2,15 +2,21 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { Role } from '../role/entities/role.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { QueryUserDto } from './dto/query-user.dto';
+import {
+  BatchStatusUpdateDto,
+  BatchOperationDto,
+} from './dto/batch-operation.dto';
 
 @Injectable()
 export class UserService {
@@ -22,12 +28,12 @@ export class UserService {
   ) {}
 
   /**
-   * 用户注册业务逻辑：
+   * 创建用户：
    * 1. 检查用户名是否已存在
    * 2. 对密码进行加密
    * 3. 创建并保存用户记录
    */
-  async register(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     // 检查用户名是否已存在
     const existingUser = await this.userRepository.findOne({
       where: { username: createUserDto.username },
@@ -44,70 +50,279 @@ export class UserService {
       ...createUserDto,
       password: hashedPassword,
     });
-    return await this.userRepository.save(user);
+
+    // 保存用户并返回结果（不包含密码）
+    const savedUser = await this.userRepository.save(user);
+    const { password: _password, ...result } = savedUser;
+    return result as User;
   }
 
   /**
-   * 根据用户ID获取用户详情，并加载关联角色数据
+   * 根据ID查找用户
    */
-  async findById(id: number): Promise<User> {
+  async findById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['roles'],
     });
+
     if (!user) {
       throw new NotFoundException(`用户ID ${id} 未找到`);
     }
+
     return user;
-  }
-  /**
-   * 根据用户名获取用户详情
-   */
-  async findByUsername(username: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { username } });
   }
 
   /**
-   * 更新用户信息：
-   * 1. 如果包含密码字段，则先加密新密码
-   * 2. 更新用户的其他信息
+   * 根据用户名查找用户
    */
-  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async findByUsername(username: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: ['roles'],
+      select: [
+        'id',
+        'username',
+        'password',
+        'email',
+        'phoneNumber',
+        'avatar',
+        'realName',
+        'isActive',
+        'createdAt',
+        'updatedAt',
+      ],
+    });
+
+    return user;
+  }
+
+  /**
+   * 根据邮箱查找用户
+   */
+  async findByEmail(email: string): Promise<User> {
+    if (!email) return null;
+
+    const user = await this.userRepository.findOne({
+      where: { email },
+      relations: ['roles'],
+      select: [
+        'id',
+        'username',
+        'password',
+        'email',
+        'phoneNumber',
+        'avatar',
+        'realName',
+        'isActive',
+        'createdAt',
+        'updatedAt',
+      ],
+    });
+
+    return user;
+  }
+
+  /**
+   * 更新用户信息
+   */
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    // 检查用户是否存在
+    const user = await this.findById(id);
+
+    // 如果请求更新密码，则加密新密码
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-    await this.userRepository.update(id, updateUserDto);
-    return this.findById(id);
+
+    // 更新用户信息
+    const updatedUser = await this.userRepository.save({
+      ...user,
+      ...updateUserDto,
+    });
+
+    // 移除返回结果中的密码字段
+    const { password: _password, ...result } = updatedUser;
+    return result as User;
   }
 
   /**
-   * 删除用户：
-   * 删除用户记录（级联删除用户与角色、权限关联）
+   * 删除用户
    */
-  async deleteUser(id: number): Promise<void> {
-    await this.userRepository.delete(id);
+  async remove(id: string): Promise<void> {
+    const user = await this.findById(id);
+    await this.userRepository.remove(user);
   }
 
   /**
-   * 分配角色给指定用户：
-   * 1. 根据传入的角色ID数组查询角色
-   * 2. 将角色分配给用户并保存
+   * 为用户分配角色
    */
   async assignRoles(
-    userId: number,
+    userId: string,
     assignRoleDto: AssignRoleDto,
   ): Promise<User> {
-    // 根据用户ID查询用户详情
+    // 查找用户
     const user = await this.findById(userId);
 
-    // 根据传入的角色ID查询角色记录
-    const roles = await this.roleRepository.findByIds(assignRoleDto.roleIds);
-    if (!roles || roles.length === 0) {
-      throw new NotFoundException('未找到对应的角色');
+    // 查找角色
+    const roles = await this.roleRepository.findBy({
+      name: In(assignRoleDto.roles),
+    });
+
+    if (!roles.length) {
+      throw new NotFoundException('未找到指定的角色');
     }
 
-    // 更新用户的角色信息
+    // 更新用户角色
     user.roles = roles;
-    return await this.userRepository.save(user);
+    await this.userRepository.save(user);
+
+    return user;
+  }
+
+  /**
+   * 分页查询用户
+   */
+  async findAll(queryUserDto: QueryUserDto): Promise<{
+    items: User[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const { page = 1, limit = 10, keyword, role, isActive } = queryUserDto;
+
+    // 构建查询条件
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.roles', 'role')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    // 添加条件过滤
+    if (keyword) {
+      queryBuilder.andWhere(
+        '(user.username LIKE :keyword OR user.email LIKE :keyword OR user.realName LIKE :keyword OR user.phoneNumber LIKE :keyword)',
+        { keyword: `%${keyword}%` },
+      );
+    }
+
+    if (role) {
+      queryBuilder.andWhere('role.name = :role', { role });
+    }
+
+    if (isActive !== undefined) {
+      queryBuilder.andWhere('user.isActive = :isActive', { isActive });
+    }
+
+    // 排序
+    queryBuilder.orderBy('user.createdAt', 'DESC');
+
+    // 执行查询
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    // 处理返回结果，移除密码字段
+    const safeUsers = items.map((user) => {
+      const { password: _password, ...result } = user;
+      return result as User;
+    });
+
+    return {
+      items: safeUsers,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  /**
+   * 批量删除用户
+   */
+  async batchRemove(batchDto: BatchOperationDto): Promise<void> {
+    const users = await this.userRepository.findBy({
+      id: In(batchDto.ids),
+    });
+
+    if (!users.length) {
+      throw new BadRequestException('未找到指定的用户');
+    }
+
+    await this.userRepository.remove(users);
+  }
+
+  /**
+   * 批量更新用户状态
+   */
+  async batchUpdateStatus(batchStatusDto: BatchStatusUpdateDto): Promise<void> {
+    await this.userRepository.update(
+      { id: In(batchStatusDto.ids) },
+      { isActive: batchStatusDto.isActive },
+    );
+  }
+
+  /**
+   * 获取用户统计数据
+   */
+  async getStatistics() {
+    // 获取总用户数
+    const totalUsers = await this.userRepository.count();
+
+    // 获取活跃用户数
+    const activeUsers = await this.userRepository.count({
+      where: { isActive: true },
+    });
+
+    // 获取非活跃用户数
+    const inactiveUsers = await this.userRepository.count({
+      where: { isActive: false },
+    });
+
+    // 获取角色分布
+    const roleDistribution = await this.roleRepository
+      .createQueryBuilder('role')
+      .leftJoin('role.users', 'user')
+      .select('role.name', 'role')
+      .addSelect('COUNT(user.id)', 'count')
+      .groupBy('role.name')
+      .getRawMany();
+
+    // 转换角色分布为对象格式
+    const roleDistributionObj = {};
+    roleDistribution.forEach((item) => {
+      roleDistributionObj[item.role] = parseInt(item.count, 10);
+    });
+
+    // 获取状态分布
+    const statusDistribution = {
+      active: activeUsers,
+      inactive: inactiveUsers,
+    };
+
+    // 获取过去6个月的注册用户数
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyRegistration = await this.userRepository
+      .createQueryBuilder('user')
+      .select("DATE_FORMAT(user.createdAt, '%Y-%m')", 'month')
+      .addSelect('COUNT(user.id)', 'count')
+      .where('user.createdAt >= :sixMonthsAgo', { sixMonthsAgo })
+      .groupBy('month')
+      .orderBy('month', 'ASC')
+      .getRawMany();
+
+    // 转换月度注册用户数为数组格式
+    const monthlyRegistrationArr = monthlyRegistration.map((item) => ({
+      month: item.month,
+      count: parseInt(item.count, 10),
+    }));
+
+    return {
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      roleDistribution: roleDistributionObj,
+      statusDistribution,
+      monthlyRegistration: monthlyRegistrationArr,
+    };
   }
 }

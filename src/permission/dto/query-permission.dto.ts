@@ -1,31 +1,63 @@
-import { IsOptional, IsString, IsNumber, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsInt, Min, IsBoolean } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
-/**
- * 用于权限列表查询，支持关键字搜索、分页和排序。
- */
 export class QueryPermissionDto {
-  // 搜索关键字，通常针对权限名称
-  @IsOptional()
-  @IsString()
-  q?: string;
-
-  // 分页页码，最小值为 1
+  @ApiPropertyOptional({
+    description: '页码',
+    example: 1,
+    default: 1,
+    minimum: 1,
+    required: false,
+  })
+  @IsInt({ message: '页码必须是整数' })
+  @Min(1, { message: '页码最小值为1' })
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
-  @Min(1)
   page?: number = 1;
 
-  // 每页条数，最小值为 1
+  @ApiPropertyOptional({
+    description: '每页数量',
+    example: 10,
+    default: 10,
+    minimum: 1,
+    required: false,
+  })
+  @IsInt({ message: '每页数量必须是整数' })
+  @Min(1, { message: '每页数量最小值为1' })
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
-  @Min(1)
   limit?: number = 10;
 
-  // 排序字段，例如 'permission_name:asc' 或 'created_at:desc'
+  @ApiPropertyOptional({
+    description: '关键词搜索（权限名称或编码）',
+    example: '用户管理',
+    required: false,
+  })
+  @IsString({ message: '关键词必须是字符串' })
   @IsOptional()
-  @IsString()
-  sort?: string;
+  keyword?: string;
+
+  @ApiPropertyOptional({
+    description: '所属模块',
+    example: 'user',
+    required: false,
+  })
+  @IsString({ message: '模块必须是字符串' })
+  @IsOptional()
+  module?: string;
+
+  @ApiPropertyOptional({
+    description: '是否激活',
+    example: true,
+    required: false,
+  })
+  @IsBoolean({ message: '状态必须是布尔值' })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  isActive?: boolean;
 }

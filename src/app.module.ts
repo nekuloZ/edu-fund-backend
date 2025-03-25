@@ -3,22 +3,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { NotificationModule } from './notification/notification.module';
-import { DisbursementRecordModule } from './disbursement-record/disbursement-record.module';
-import { ReviewLogModule } from './review-log/review-log.module';
-import { ApplicationAttachmentModule } from './application-attachment/application-attachment.module';
-import { FundApplicationModule } from './fund-application/fund-application.module';
-import { FundInstitutionModule } from './fund-institution/fund-institution.module';
 import { PermissionModule } from './permission/permission.module';
 import { RoleModule } from './role/role.module';
-import { RolePermissionModule } from './role-permission/role-permission.module';
 import { AuthModule } from './auth/auth.module';
-import { FundDonationModule } from './fund-donation/fund-donation.module';
-import { FundDynamicLogModule } from './fund-dynamic-log/fund-dynamic-log.module';
-import { FundProjectModule } from './fund-project/fund-project.module';
-import { FundProjectTypeModule } from './fund-project-type/fund-project-type.module';
-import { ApplicationStatusModule } from './application-status/application-status.module';
-import { TierModule } from './tier/tier.module';
+import { ProjectModule } from './project/project.module';
+import { ProjectTimelineModule } from './project-timeline/project-timeline.module';
+import { DonationModule } from './donation/donation.module';
+import { CertificateModule } from './certificate/certificate.module';
+import { FundPoolModule } from './fund-pool/fund-pool.module';
+import { FundAllocationModule } from './fund-allocation/fund-allocation.module';
+import { ProjectApplicationModule } from './project-application/project-application.module';
+import { StudentModule } from './student/student.module';
+import { StudentAidRecordModule } from './student-aid-record/student-aid-record.module';
+import { AcademicProgressModule } from './academic-progress/academic-progress.module';
+import { OrganizationModule } from './organization/organization.module';
+import { AuditLogModule } from './audit-log/audit-log.module';
+import { DocumentModule } from './document/document.module';
 
 @Module({
   imports: [
@@ -37,19 +37,19 @@ import { TierModule } from './tier/tier.module';
     UserModule,
     RoleModule,
     PermissionModule,
-    FundInstitutionModule,
-    FundApplicationModule,
-    ApplicationAttachmentModule,
-    ReviewLogModule,
-    DisbursementRecordModule,
-    NotificationModule,
-    RolePermissionModule,
-    FundDonationModule,
-    FundDynamicLogModule,
-    FundProjectModule,
-    FundProjectTypeModule,
-    ApplicationStatusModule,
-    TierModule,
+    OrganizationModule,
+    ProjectApplicationModule,
+    DonationModule,
+    ProjectModule,
+    ProjectTimelineModule,
+    CertificateModule,
+    FundPoolModule,
+    FundAllocationModule,
+    StudentModule,
+    StudentAidRecordModule,
+    AcademicProgressModule,
+    AuditLogModule,
+    DocumentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
