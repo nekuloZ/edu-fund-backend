@@ -37,7 +37,7 @@ export class PermissionController {
    * 前台接口 - 获取权限列表
    */
   @Get('api/front/permission/list')
-  @ApiTags('前台接口')
+  @ApiTags('权限模块-前台')
   @ApiOperation({
     summary: '获取权限列表',
     description: '获取所有公开的权限列表，支持分页和筛选',
@@ -62,7 +62,7 @@ export class PermissionController {
    * 前台接口 - 获取权限详情
    */
   @Get('api/front/permission/detail/:id')
-  @ApiTags('前台接口')
+  @ApiTags('权限模块-前台')
   @ApiOperation({
     summary: '获取权限详情',
     description: '根据权限ID获取权限的详细信息',
@@ -81,7 +81,7 @@ export class PermissionController {
     summary: '创建权限',
     description: '创建新的权限，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('权限模块-后台')
   @ApiResponse({
     status: 201,
     description: '创建权限成功',
@@ -137,7 +137,7 @@ export class PermissionController {
     summary: '获取权限列表',
     description: '获取所有权限列表，支持分页和查询',
   })
-  @ApiTags('后台接口')
+  @ApiTags('权限模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取权限列表成功',
@@ -214,7 +214,7 @@ export class PermissionController {
     summary: '获取权限详情',
     description: '获取指定权限的详细信息',
   })
-  @ApiTags('后台接口')
+  @ApiTags('权限模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取权限详情成功',
@@ -275,7 +275,7 @@ export class PermissionController {
     summary: '更新权限',
     description: '更新权限信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('权限模块-后台')
   @ApiResponse({
     status: 200,
     description: '更新权限信息成功',
@@ -348,7 +348,7 @@ export class PermissionController {
     summary: '删除权限',
     description: '删除指定的权限，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('权限模块-后台')
   @Delete(':id')
   @Roles('admin')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -360,7 +360,7 @@ export class PermissionController {
     summary: '获取权限统计',
     description: '获取权限相关的统计数据，包括总数、状态分布等',
   })
-  @ApiTags('后台接口')
+  @ApiTags('权限模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取权限统计数据成功',

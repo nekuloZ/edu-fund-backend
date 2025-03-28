@@ -32,7 +32,7 @@ export class AuthController {
    * 前台接口 - 用户登录
    */
   @Post('api/front/auth/login')
-  @ApiTags('前台接口')
+  @ApiTags('认证模块-前台')
   @ApiOperation({
     summary: '用户登录',
     description: '用户登录并获取访问令牌',
@@ -83,7 +83,7 @@ export class AuthController {
    * 前台接口 - 用户注册
    */
   @Post('api/front/auth/register')
-  @ApiTags('前台接口')
+  @ApiTags('认证模块-前台')
   @ApiOperation({
     summary: '用户注册',
     description: '创建新的用户账号',
@@ -122,7 +122,7 @@ export class AuthController {
    * 前台接口 - 获取当前用户信息
    */
   @Get('api/front/auth/profile')
-  @ApiTags('前台接口')
+  @ApiTags('认证模块-前台')
   @ApiOperation({
     summary: '获取当前用户信息',
     description: '获取当前登录用户的详细信息',
@@ -151,7 +151,7 @@ export class AuthController {
    * 后台接口 - 管理员登录
    */
   @Post('api/admin/auth/login')
-  @ApiTags('后台接口')
+  @ApiTags('认证模块-后台')
   @ApiOperation({
     summary: '管理员登录',
     description: '管理员登录并获取访问令牌',
@@ -202,7 +202,7 @@ export class AuthController {
    * 后台接口 - 创建管理员
    */
   @Post('api/admin/auth/register')
-  @ApiTags('后台接口')
+  @ApiTags('认证模块-后台')
   @ApiOperation({
     summary: '创建管理员',
     description: '创建新的管理员账号，需要超级管理员权限',

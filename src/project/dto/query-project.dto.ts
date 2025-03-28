@@ -7,6 +7,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ProjectType } from '../entities/project.entity';
 
 export class QueryProjectDto {
   @ApiPropertyOptional({
@@ -25,6 +26,16 @@ export class QueryProjectDto {
   @IsOptional()
   @IsArray()
   categories?: string[];
+
+  @ApiPropertyOptional({
+    description: '项目类型列表',
+    enum: ProjectType,
+    isArray: true,
+    example: [ProjectType.GRANT, ProjectType.SCHOLARSHIP],
+  })
+  @IsOptional()
+  @IsEnum(ProjectType, { each: true })
+  projectType?: ProjectType[];
 
   @ApiPropertyOptional({
     description: '项目状态列表',

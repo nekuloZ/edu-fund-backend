@@ -26,7 +26,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 
-@ApiTags('donation')
+@ApiTags('捐赠管理-前台和后台')
 @Controller()
 export class DonationController {
   constructor(private readonly donationService: DonationService) {}

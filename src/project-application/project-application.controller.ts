@@ -38,7 +38,7 @@ export class ProjectApplicationController {
    * 前台接口 - 提交项目申请
    */
   @Post('api/front/project-application')
-  @ApiTags('前台接口')
+  @ApiTags('项目申请-前台')
   @ApiOperation({
     summary: '提交项目申请',
     description: '用户提交新项目申请，需要管理员审核通过后才会创建项目',
@@ -93,7 +93,7 @@ export class ProjectApplicationController {
    * 前台接口 - 获取申请列表
    */
   @Get('api/front/project-application/list')
-  @ApiTags('前台接口')
+  @ApiTags('项目申请-前台')
   @ApiOperation({
     summary: '获取申请列表',
     description: '获取当前用户提交的项目申请列表，支持分页和筛选',
@@ -165,7 +165,7 @@ export class ProjectApplicationController {
    * 前台接口 - 获取申请详情
    */
   @Get('api/front/project-application/detail/:id')
-  @ApiTags('前台接口')
+  @ApiTags('项目申请-前台')
   @ApiOperation({
     summary: '获取申请详情',
     description: '根据申请ID获取申请的详细信息',
@@ -226,11 +226,11 @@ export class ProjectApplicationController {
   /**
    * 后台接口 - 创建项目申请
    */
+  @ApiTags('项目申请-后台')
   @ApiOperation({
     summary: '创建项目申请',
     description: '创建新的项目申请，需要管理员权限',
   })
-  @ApiTags('后台接口')
   @Post('api/admin/project-application')
   async createProjectApplication(
     @Body() createProjectApplicationDto: CreateProjectApplicationDto,
@@ -243,11 +243,11 @@ export class ProjectApplicationController {
   /**
    * 后台接口 - 获取申请列表
    */
+  @ApiTags('项目申请-后台')
   @ApiOperation({
     summary: '获取申请列表',
     description: '获取所有项目申请列表，支持分页和查询',
   })
-  @ApiTags('后台接口')
   @Get('api/admin/project-applications')
   async findAllAdmin(@Req() req) {
     return await this.projectApplicationService.findAll(req.user.id);
@@ -256,11 +256,11 @@ export class ProjectApplicationController {
   /**
    * 后台接口 - 获取申请详情
    */
+  @ApiTags('项目申请-后台')
   @ApiOperation({
     summary: '获取申请详情',
     description: '获取指定项目申请的详细信息',
   })
-  @ApiTags('后台接口')
   @Get('api/admin/project-application/:id')
   async findOneAdmin(@Param('id', ParseUUIDPipe) id: string, @Req() _req) {
     return await this.projectApplicationService.findOne(id);
@@ -269,11 +269,11 @@ export class ProjectApplicationController {
   /**
    * 后台接口 - 更新申请
    */
+  @ApiTags('项目申请-后台')
   @ApiOperation({
     summary: '更新申请',
     description: '更新项目申请信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
   @Put('api/admin/project-application/:id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -357,11 +357,11 @@ export class ProjectApplicationController {
   /**
    * 后台接口 - 删除申请
    */
+  @ApiTags('项目申请-后台')
   @ApiOperation({
     summary: '删除申请',
     description: '删除指定的项目申请，需要管理员权限',
   })
-  @ApiTags('后台接口')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete('api/admin/project-application/:id')
@@ -370,11 +370,11 @@ export class ProjectApplicationController {
     return { success: true, message: '申请删除成功' };
   }
 
+  @ApiTags('项目申请-后台')
   @ApiOperation({
     summary: '获取申请统计',
     description: '获取项目申请相关的统计数据，包括总数、状态分布等',
   })
-  @ApiTags('后台接口')
   @Get('api/admin/project-application/statistics')
   async getStatistics(@Req() req) {
     return await this.projectApplicationService.getStatistics(req.user.id);

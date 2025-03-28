@@ -36,7 +36,7 @@ export class StudentAidRecordController {
    * 前台接口 - 获取资助记录列表
    */
   @Get('api/front/student-aid-record/list')
-  @ApiTags('前台接口')
+  @ApiTags('学生资助-前台')
   @ApiOperation({
     summary: '获取资助记录列表',
     description: '获取所有公开的资助记录列表，支持分页和筛选',
@@ -89,7 +89,7 @@ export class StudentAidRecordController {
    * 前台接口 - 获取资助记录详情
    */
   @Get('api/front/student-aid-record/detail/:id')
-  @ApiTags('前台接口')
+  @ApiTags('学生资助-前台')
   @ApiOperation({
     summary: '获取资助记录详情',
     description: '根据资助记录ID获取详细信息',
@@ -134,7 +134,7 @@ export class StudentAidRecordController {
   /**
    * 获取学生的资助记录（前台）
    */
-  @ApiTags('前台API')
+  @ApiTags('学生资助-前台')
   @ApiOperation({
     summary: '获取指定学生的资助记录（前台）',
     description: '根据学生ID获取该学生的所有资助记录，仅返回公开信息',
@@ -185,7 +185,7 @@ export class StudentAidRecordController {
     summary: '创建资助记录',
     description: '创建新的资助记录，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('学生资助-后台')
   @ApiResponse({
     status: 201,
     description: '创建资助记录成功',
@@ -250,7 +250,7 @@ export class StudentAidRecordController {
     summary: '获取资助记录列表',
     description: '获取所有资助记录列表，支持分页和查询',
   })
-  @ApiTags('后台接口')
+  @ApiTags('学生资助-后台')
   @ApiResponse({
     status: 200,
     description: '获取资助记录列表成功',
@@ -327,7 +327,7 @@ export class StudentAidRecordController {
     summary: '获取资助记录详情',
     description: '获取指定资助记录的详细信息',
   })
-  @ApiTags('后台接口')
+  @ApiTags('学生资助-后台')
   @ApiResponse({
     status: 200,
     description: '获取资助记录详情成功',
@@ -396,7 +396,7 @@ export class StudentAidRecordController {
     summary: '更新资助记录',
     description: '更新资助记录信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('学生资助-后台')
   @ApiResponse({
     status: 200,
     description: '更新资助记录成功',
@@ -469,7 +469,7 @@ export class StudentAidRecordController {
     summary: '删除资助记录',
     description: '删除指定的资助记录，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('学生资助-后台')
   @ApiParam({
     name: 'id',
     description: '资助记录ID',
@@ -495,7 +495,7 @@ export class StudentAidRecordController {
   /**
    * 获取学生的全部资助记录
    */
-  @ApiTags('后台管理')
+  @ApiTags('学生资助-后台')
   @ApiOperation({
     summary: '获取学生的全部资助记录',
     description: '根据学生ID获取该学生的所有资助记录，需要管理员权限',
@@ -549,7 +549,7 @@ export class StudentAidRecordController {
   /**
    * 获取项目的资助记录
    */
-  @ApiTags('后台管理')
+  @ApiTags('学生资助-后台')
   @ApiOperation({
     summary: '获取项目的资助记录',
     description: '根据项目ID获取该项目的所有资助记录，需要管理员权限',
@@ -598,7 +598,7 @@ export class StudentAidRecordController {
     summary: '获取资助统计',
     description: '获取资助相关的统计数据，包括总额、类型分布等',
   })
-  @ApiTags('后台接口')
+  @ApiTags('学生资助-后台')
   @ApiResponse({
     status: 200,
     description: '返回资助统计数据',

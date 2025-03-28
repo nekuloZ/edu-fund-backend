@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FundAllocation } from './entities/fund-allocation.entity';
-import { Project } from '../project/entities/project.entity';
+import { Project, ProjectType } from '../project/entities/project.entity';
 import { User } from '../user/entities/user.entity';
 import { CreateFundAllocationDto } from './dto/create-fund-allocation.dto';
 import {
@@ -49,6 +49,11 @@ export class FundAllocationService {
 
     if (!project) {
       throw new NotFoundException(`ID为${projectId}的项目不存在`);
+    }
+
+    // 验证项目类型是否允许接收资金分配
+    if (project.projectType === ProjectType.GENERAL_FUND) {
+      throw new BadRequestException(`不能向公共池类型的项目直接分配资金`);
     }
 
     // 检查资金池是否有足够资金

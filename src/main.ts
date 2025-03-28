@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as fs from 'fs';
+import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,25 +16,31 @@ async function bootstrap() {
     .setTitle('公益基金管理系统API')
     .setDescription('公益基金管理系统的API文档')
     .setVersion('1.0')
-    .addTag('auth', '认证管理')
-    .addTag('front-project', '前台项目接口')
-    .addTag('admin-project', '后台项目管理')
-    .addTag('donation', '捐赠管理')
-    .addTag('fund-pool', '资金池管理')
-    .addTag('fund-allocation', '资金分配管理')
-    .addTag('student', '学生管理')
-    .addTag('academic-progress', '学业进度管理')
-    .addTag('certificate', '证书管理')
-    .addTag('document', '文档管理')
-    .addTag('audit-log', '审计日志')
+    // 移除了重复的标签，因为已经在控制器中定义了统一的ApiTags
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+
+  // 创建docs目录（如果不存在）
+  const docsPath = path.join(process.cwd(), 'docs');
+  if (!fs.existsSync(docsPath)) {
+    fs.mkdirSync(docsPath);
+  }
+
+  // 导出Swagger文档为JSON文件
+  fs.writeFileSync(
+    path.join(docsPath, 'swagger-spec.json'),
+    JSON.stringify(document, null, 2),
+  );
+  console.log('Swagger文档已导出到 docs/swagger-spec.json');
+
+  // 设置Swagger UI
   SwaggerModule.setup('api-docs', app, document);
 
   await app.listen(3000);
-  console.log('Server is running on http://localhost:3000');
-  console.log('API Documentation available at http://localhost:3000/api-docs');
+  console.log('服务器运行在 http://localhost:3000');
+  console.log('API文档可在 http://localhost:3000/api-docs 访问');
+  console.log('您也可以使用导出的JSON文件生成其他格式的文档');
 }
 bootstrap();

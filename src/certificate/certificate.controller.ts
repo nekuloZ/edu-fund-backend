@@ -28,7 +28,7 @@ import { CreateCertificateDto } from './dto/create-certificate.dto';
 import { UpdateCertificateDto } from './dto/update-certificate.dto';
 import { QueryCertificateDto } from './dto/query-certificate.dto';
 
-@ApiTags('certificate')
+@ApiTags('证书管理-前台和后台')
 @Controller()
 export class CertificateController {
   constructor(private readonly certificateService: CertificateService) {}

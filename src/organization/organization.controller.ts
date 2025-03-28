@@ -33,7 +33,7 @@ export class OrganizationController {
    * 前台接口 - 获取组织列表
    */
   @Get('api/front/organization/list')
-  @ApiTags('前台接口')
+  @ApiTags('组织模块-前台')
   @ApiOperation({
     summary: '获取组织列表',
     description: '获取所有公开的组织列表，支持分页和筛选',
@@ -109,7 +109,7 @@ export class OrganizationController {
    * 前台接口 - 获取组织详情
    */
   @Get('api/front/organization/detail/:id')
-  @ApiTags('前台接口')
+  @ApiTags('组织模块-前台')
   @ApiOperation({
     summary: '获取组织详情',
     description: '根据组织ID获取组织的详细信息',
@@ -181,7 +181,7 @@ export class OrganizationController {
     summary: '创建组织',
     description: '创建新的组织，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('组织模块-后台')
   @ApiResponse({
     status: 201,
     description: '创建组织成功',
@@ -247,7 +247,7 @@ export class OrganizationController {
     summary: '获取组织列表',
     description: '获取所有组织列表，支持分页和查询',
   })
-  @ApiTags('后台接口')
+  @ApiTags('组织模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取组织列表成功',
@@ -322,7 +322,7 @@ export class OrganizationController {
     summary: '获取组织详情',
     description: '获取指定组织的详细信息',
   })
-  @ApiTags('后台接口')
+  @ApiTags('组织模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取组织详情成功',
@@ -390,7 +390,7 @@ export class OrganizationController {
     summary: '更新组织',
     description: '更新组织信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('组织模块-后台')
   @ApiResponse({
     status: 200,
     description: '更新组织信息成功',
@@ -470,7 +470,7 @@ export class OrganizationController {
     summary: '删除组织',
     description: '删除指定的组织，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('组织模块-后台')
   @ApiResponse({
     status: 200,
     description: '删除组织成功',
@@ -500,7 +500,7 @@ export class OrganizationController {
     summary: '获取组织统计',
     description: '获取组织相关的统计数据，包括总数、类型分布等',
   })
-  @ApiTags('后台接口')
+  @ApiTags('组织模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取组织统计数据成功',

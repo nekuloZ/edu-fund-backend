@@ -15,6 +15,20 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../user/entities/user.entity';
 import { Permission } from '../../permission/entities/permission.entity';
 
+// 添加项目类型枚举
+export enum ProjectType {
+  GRANT = 'grant', // 助学金项目
+  SCHOLARSHIP = 'scholarship', // 奖学金项目
+  SCHOOL_CONSTRUCTION = 'school_construction', // 学校建设项目
+  TEACHER_TRAINING = 'teacher_training', // 师资培训项目
+  SPECIAL_EDUCATION = 'special_education', // 特殊教育项目
+  NUTRITION_IMPROVEMENT = 'nutrition_improvement', // 营养改善项目
+  STUDENT_DEVELOPMENT = 'student_development', // 学生综合素质发展项目
+  GENERAL_FUND = 'general_fund', // 公共池
+  VOCATIONAL_EDUCATION = 'vocational_education', // 职业教育项目
+  RESEARCH_INNOVATION = 'research_innovation', // 科研创新项目
+}
+
 @Entity('projects')
 export class Project {
   @PrimaryGeneratedColumn('uuid')
@@ -25,6 +39,20 @@ export class Project {
 
   @Column({ type: 'text' })
   description: string;
+
+  // 添加项目类型字段
+  @ApiProperty({
+    description: '项目类型',
+    enum: ProjectType,
+    example: ProjectType.GENERAL_FUND,
+  })
+  @Column({
+    type: 'enum',
+    enum: ProjectType,
+    default: ProjectType.GENERAL_FUND,
+    name: 'project_type',
+  })
+  projectType: ProjectType;
 
   @Column({ nullable: true, name: 'image_url' })
   imageUrl: string;

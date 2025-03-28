@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Project } from './entities/project.entity';
+import { Project, ProjectType } from './entities/project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { QueryProjectDto } from './dto/query-project.dto';
@@ -27,22 +27,21 @@ export class ProjectService {
   }
 
   /**
-   * 查询项目列表（包含筛选和分页）
+   * 查询项目列表
    */
-  async findAll(
-    queryDto: QueryProjectDto,
-  ): Promise<{ items: Project[]; total: number; page: number; limit: number }> {
+  async findAll(queryProjectDto: QueryProjectDto): Promise<any> {
     const {
       keyword,
       categories,
       status,
       province,
       city,
+      projectType, // 项目类型过滤
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
       sortOrder = 'DESC',
-    } = queryDto;
+    } = queryProjectDto;
 
     const queryBuilder = this.projectRepository.createQueryBuilder('project');
 
@@ -50,31 +49,46 @@ export class ProjectService {
     if (keyword) {
       queryBuilder.andWhere(
         '(project.title LIKE :keyword OR project.description LIKE :keyword)',
-        {
-          keyword: `%${keyword}%`,
-        },
+        { keyword: `%${keyword}%` },
       );
     }
 
-    // 按类别筛选
+    // 分类过滤
     if (categories && categories.length > 0) {
-      queryBuilder.andWhere('project.category && :categories', { categories });
+      queryBuilder.andWhere('JSON_OVERLAPS(project.category, :categories)', {
+        categories: JSON.stringify(categories),
+      });
     }
 
-    // 按状态筛选
+    // 项目类型过滤
+    if (projectType && projectType.length > 0) {
+      queryBuilder.andWhere('project.projectType IN (:...projectType)', {
+        projectType,
+      });
+    }
+
+    // 项目状态过滤
     if (status && status.length > 0) {
       queryBuilder.andWhere('project.status IN (:...status)', { status });
     }
 
-    // 按地区筛选
+    // 地区过滤
     if (province) {
-      queryBuilder.andWhere("project.location->'province' = :province", {
-        province,
-      });
+      queryBuilder.andWhere(
+        "JSON_EXTRACT(project.location, '$.province') = :province",
+        {
+          province,
+        },
+      );
     }
 
     if (city) {
-      queryBuilder.andWhere("project.location->'city' = :city", { city });
+      queryBuilder.andWhere(
+        "JSON_EXTRACT(project.location, '$.city') = :city",
+        {
+          city,
+        },
+      );
     }
 
     // 计算总数
@@ -86,13 +100,16 @@ export class ProjectService {
       .skip((page - 1) * limit)
       .take(limit);
 
-    const items = await queryBuilder.getMany();
+    const projects = await queryBuilder.getMany();
 
     return {
-      items,
-      total,
-      page,
-      limit,
+      projects,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -207,25 +224,63 @@ export class ProjectService {
     return await this.projectApplicationRepository.save(application);
   }
 
+  /**
+   * 获取项目统计数据
+   */
   async getStatistics() {
-    // TODO: 实现获取项目统计数据的逻辑
+    // 统计各项目类型的数量
+    const projectTypeStats = await this.projectRepository
+      .createQueryBuilder('project')
+      .select('project.projectType', 'type')
+      .addSelect('COUNT(project.id)', 'count')
+      .groupBy('project.projectType')
+      .getRawMany();
+
+    // 统计各项目状态的数量
+    const statusStats = await this.projectRepository
+      .createQueryBuilder('project')
+      .select('project.status', 'status')
+      .addSelect('COUNT(project.id)', 'count')
+      .groupBy('project.status')
+      .getRawMany();
+
+    // 获取项目总数
+    const totalProjects = await this.projectRepository.count();
+
+    // 获取活跃项目数量
+    const activeProjects = await this.projectRepository.count({
+      where: { status: 'ongoing' },
+    });
+
+    // 获取已完成项目数量
+    const completedProjects = await this.projectRepository.count({
+      where: { status: 'completed' },
+    });
+
+    // 捐赠相关统计
+    // TODO: 实现从捐赠表获取统计数据
+
     return {
-      totalProjects: 100,
-      activeProjects: 80,
-      completedProjects: 20,
-      statusDistribution: {
-        active: 80,
-        completed: 20,
-      },
-      totalDonations: 500000,
-      averageDonation: 5000,
+      totalProjects,
+      activeProjects,
+      completedProjects,
+      statusDistribution: statusStats.reduce((acc, curr) => {
+        acc[curr.status] = parseInt(curr.count);
+        return acc;
+      }, {}),
+      projectTypeDistribution: projectTypeStats.reduce((acc, curr) => {
+        acc[curr.type] = parseInt(curr.count);
+        return acc;
+      }, {}),
+      totalDonations: 500000, // 占位数据
+      averageDonation: 5000, // 占位数据
       monthlyDonations: [
         {
           month: '2024-03',
           amount: 50000,
           count: 10,
         },
-      ],
+      ], // 占位数据
     };
   }
 }

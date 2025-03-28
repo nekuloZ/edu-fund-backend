@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsArray,
+  IsEnum,
+} from 'class-validator';
 import { CreateApplicationDto } from './create-application.dto';
+import { ProjectType } from '../../project/entities/project.entity';
 
 export class CreateProjectApplicationDto extends CreateApplicationDto {
   @ApiProperty({ description: '项目名称' })
@@ -10,6 +17,14 @@ export class CreateProjectApplicationDto extends CreateApplicationDto {
   @ApiProperty({ description: '项目描述' })
   @IsString()
   description: string;
+
+  @ApiProperty({
+    description: '项目类型',
+    enum: ProjectType,
+    example: ProjectType.GRANT,
+  })
+  @IsEnum(ProjectType)
+  projectType: ProjectType;
 
   @ApiProperty({ description: '目标金额' })
   @IsNumber()

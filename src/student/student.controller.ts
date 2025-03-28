@@ -35,7 +35,7 @@ export class StudentController {
    * 前台接口 - 获取学生列表
    */
   @Get('api/front/student/list')
-  @ApiTags('前台接口')
+  @ApiTags('学生模块-前台')
   @ApiOperation({
     summary: '获取学生列表',
     description: '获取所有公开的学生列表，支持分页和筛选',
@@ -90,7 +90,7 @@ export class StudentController {
    * 前台接口 - 获取学生详情
    */
   @Get('api/front/student/detail/:id')
-  @ApiTags('前台接口')
+  @ApiTags('学生模块-前台')
   @ApiOperation({
     summary: '获取学生详情',
     description: '根据学生ID获取学生的详细信息',
@@ -139,11 +139,11 @@ export class StudentController {
   /**
    * 后台接口 - 创建学生
    */
+  @ApiTags('学生模块-后台')
   @ApiOperation({
     summary: '创建学生',
     description: '创建新的学生信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
   @ApiResponse({
     status: 201,
     description: '创建成功，返回创建的学生信息',
@@ -196,11 +196,11 @@ export class StudentController {
   /**
    * 后台接口 - 获取学生列表
    */
+  @ApiTags('学生模块-后台')
   @ApiOperation({
     summary: '获取学生列表',
     description: '获取所有学生列表，支持分页和查询',
   })
-  @ApiTags('后台接口')
   @ApiResponse({
     status: 200,
     description: '返回学生列表及分页信息',
@@ -251,11 +251,11 @@ export class StudentController {
   /**
    * 后台接口 - 获取学生详情
    */
+  @ApiTags('学生模块-后台')
   @ApiOperation({
     summary: '获取学生详情',
     description: '获取指定学生的详细信息',
   })
-  @ApiTags('后台接口')
   @ApiResponse({
     status: 200,
     description: '获取学生详情成功',
@@ -319,11 +319,11 @@ export class StudentController {
   /**
    * 后台接口 - 更新学生
    */
+  @ApiTags('学生模块-后台')
   @ApiOperation({
     summary: '更新学生信息',
     description: '更新学生信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
   @ApiResponse({
     status: 200,
     description: '更新学生信息成功',
@@ -388,11 +388,11 @@ export class StudentController {
   /**
    * 后台接口 - 删除学生
    */
+  @ApiTags('学生模块-后台')
   @ApiOperation({
     summary: '删除学生',
     description: '删除指定的学生信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
   @ApiResponse({
     status: 200,
     description: '删除学生信息成功',
@@ -434,11 +434,11 @@ export class StudentController {
   /**
    * 获取学生统计
    */
+  @ApiTags('学生模块-后台')
   @ApiOperation({
     summary: '获取学生统计',
     description: '获取学生相关的统计数据，包括总数、状态分布等',
   })
-  @ApiTags('后台接口')
   @ApiResponse({
     status: 200,
     description: '返回学生统计数据',

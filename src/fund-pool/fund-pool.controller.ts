@@ -27,7 +27,7 @@ import { AdjustBalanceDto } from './dto/adjust-balance.dto';
 import { SetWarningLineDto } from './dto/set-warning-line.dto';
 import { CreateFundPoolDto } from './dto/create-fund-pool.dto';
 
-@ApiTags('资金池')
+@ApiTags('资金池-前台和后台')
 @Controller()
 export class FundPoolController {
   constructor(private readonly fundPoolService: FundPoolService) {}

@@ -22,7 +22,7 @@ export class FrontUserController {
    * 用户注册
    */
   @Post('register')
-  @ApiTags('前台接口')
+  @ApiTags('用户模块-前台')
   @ApiOperation({
     summary: '用户注册',
     description: '创建新的用户账号',
@@ -35,7 +35,7 @@ export class FrontUserController {
    * 获取个人信息
    */
   @Get('profile')
-  @ApiTags('前台接口')
+  @ApiTags('用户模块-前台')
   @ApiOperation({
     summary: '获取个人信息',
     description: '获取当前登录用户的个人资料',
@@ -49,7 +49,7 @@ export class FrontUserController {
    * 更新个人信息
    */
   @Put('profile')
-  @ApiTags('前台接口')
+  @ApiTags('用户模块-前台')
   @ApiOperation({
     summary: '更新个人信息',
     description: '更新当前登录用户的个人资料',

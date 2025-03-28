@@ -37,7 +37,7 @@ import * as path from 'path';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { Multer } from 'multer';
 
-@ApiTags('document')
+@ApiTags('文档管理-前台和后台')
 @Controller()
 export class DocumentController {
   private readonly uploadDir = 'uploads/documents';

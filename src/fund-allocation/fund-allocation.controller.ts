@@ -27,7 +27,7 @@ import { UpdateFundAllocationDto } from './dto/update-fund-allocation.dto';
 import { QueryFundAllocationDto } from './dto/query-fund-allocation.dto';
 import { ApprovalFundAllocationDto } from './dto/approval-fund-allocation.dto';
 
-@ApiTags('fund-allocation')
+@ApiTags('资金分配-前台和后台')
 @Controller()
 export class FundAllocationController {
   constructor(private readonly fundAllocationService: FundAllocationService) {}

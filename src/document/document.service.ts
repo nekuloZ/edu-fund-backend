@@ -4,9 +4,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Document } from './entities/document.entity';
-import { Project } from '../project/entities/project.entity';
+import { Project, ProjectType } from '../project/entities/project.entity';
 import { CreateDocumentDto, DocumentCategory } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { QueryDocumentDto } from './dto/query-document.dto';
@@ -348,6 +348,38 @@ export class DocumentService {
   }
 
   /**
+   * 根据项目类型获取相关文档
+   */
+  async getDocumentsByProjectType(
+    projectType: ProjectType,
+  ): Promise<Document[]> {
+    // 查询指定类型的项目
+    const projects = await this.projectRepository.find({
+      where: { projectType },
+      select: ['id'],
+    });
+
+    const projectIds = projects.map((project) => project.id);
+
+    // 如果没有找到项目，返回空数组
+    if (projectIds.length === 0) {
+      return [];
+    }
+
+    // 查询这些项目的相关文档
+    return this.documentRepository.find({
+      where: {
+        project: { id: In(projectIds) },
+        isPublic: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      relations: ['project'],
+    });
+  }
+
+  /**
    * 获取项目文档列表
    */
   async getProjectDocuments(projectId: string): Promise<Document[]> {
@@ -359,10 +391,23 @@ export class DocumentService {
       throw new NotFoundException(`项目ID为 ${projectId} 的项目不存在`);
     }
 
+    // 根据项目类型确定应返回的文档类别
+    let categories: DocumentCategory[] = [DocumentCategory.PROJECT_DOCUMENT];
+
+    // 针对不同项目类型可能有特定的文档类别要求
+    if (
+      project.projectType === ProjectType.GRANT ||
+      project.projectType === ProjectType.SCHOLARSHIP
+    ) {
+      // 助学金/奖学金项目可能需要财务报表
+      categories.push(DocumentCategory.FINANCIAL_STATEMENT);
+    }
+
     return this.documentRepository.find({
       where: {
         project: { id: projectId },
         isPublic: true,
+        category: In(categories),
       },
       order: {
         createdAt: 'DESC',

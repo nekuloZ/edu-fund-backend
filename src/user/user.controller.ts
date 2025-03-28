@@ -34,10 +34,10 @@ export class UserController {
    * 后台接口 - 创建用户
    */
   @ApiOperation({
-    summary: '创建用户',
-    description: '创建新的用户账号，需要管理员权限',
+    summary: '添加新用户',
+    description: '创建新用户账号，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('用户模块-后台')
   @ApiResponse({
     status: 201,
     description: '创建用户成功',
@@ -90,9 +90,9 @@ export class UserController {
    */
   @ApiOperation({
     summary: '获取用户列表',
-    description: '获取所有用户账号列表，支持分页和查询',
+    description: '获取所有用户的列表，支持分页和筛选，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('用户模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取用户列表成功',
@@ -160,9 +160,9 @@ export class UserController {
    */
   @ApiOperation({
     summary: '获取用户详情',
-    description: '获取指定用户的详细信息',
+    description: '根据用户ID获取用户详细信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('用户模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取用户详情成功',
@@ -221,10 +221,10 @@ export class UserController {
    * 后台接口 - 更新用户
    */
   @ApiOperation({
-    summary: '更新用户',
-    description: '更新用户信息，需要管理员权限',
+    summary: '更新用户信息',
+    description: '更新指定用户的信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('用户模块-后台')
   @ApiResponse({
     status: 200,
     description: '更新用户信息成功',
@@ -285,9 +285,9 @@ export class UserController {
    */
   @ApiOperation({
     summary: '删除用户',
-    description: '删除指定的用户账号，需要管理员权限',
+    description: '删除指定的用户',
   })
-  @ApiTags('后台接口')
+  @ApiTags('用户模块-后台')
   @ApiResponse({
     status: 200,
     description: '删除用户成功',
@@ -330,10 +330,10 @@ export class UserController {
    * 后台接口 - 分配用户角色
    */
   @ApiOperation({
-    summary: '分配用户角色',
-    description: '更新用户的角色，需要管理员权限',
+    summary: '分配角色',
+    description: '为指定用户分配角色，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('用户模块-后台')
   @ApiResponse({
     status: 200,
     description: '分配角色成功',
@@ -382,7 +382,7 @@ export class UserController {
     summary: '获取用户统计',
     description: '获取用户相关的统计数据，包括总数、角色分布等',
   })
-  @ApiTags('后台接口')
+  @ApiTags('用户模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取用户统计成功',

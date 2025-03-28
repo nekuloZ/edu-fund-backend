@@ -16,6 +16,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
 import { ProjectTimelineService } from './project-timeline.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -32,6 +33,7 @@ export class ProjectTimelineController {
   /**
    * 前台接口 - 获取项目时间线
    */
+  @ApiTags('项目时间线-前台')
   @Get('api/front/project/timeline/:projectId')
   async getFrontTimeline(@Param('projectId') projectId: string) {
     return await this.timelineService.findByProjectId(projectId);
@@ -40,6 +42,7 @@ export class ProjectTimelineController {
   /**
    * 前台接口 - 获取时间线事件详情
    */
+  @ApiTags('项目时间线-前台')
   @Get('api/front/project/timeline/event/:id')
   async getFrontTimelineEvent(@Param('id') id: string) {
     return await this.timelineService.findOne(id);
@@ -48,6 +51,7 @@ export class ProjectTimelineController {
   /**
    * 后台接口 - 获取时间线事件列表
    */
+  @ApiTags('项目时间线-后台')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('api/admin/project/timeline/list')
@@ -58,6 +62,7 @@ export class ProjectTimelineController {
   /**
    * 后台接口 - 获取指定项目的时间线
    */
+  @ApiTags('项目时间线-后台')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('api/admin/project/timeline/:projectId')
@@ -68,6 +73,7 @@ export class ProjectTimelineController {
   /**
    * 后台接口 - 获取时间线事件详情
    */
+  @ApiTags('项目时间线-后台')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('api/admin/project/timeline/event/:id')
@@ -127,6 +133,7 @@ export class ProjectTimelineController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
+  @ApiTags('项目时间线-后台')
   @Post('api/admin/project-timeline')
   async create(
     @Body() createProjectTimelineDto: CreateProjectTimelineDto,

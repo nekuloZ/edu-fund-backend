@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ProjectType } from '../entities/project.entity';
 
 export class LocationDto {
   @ApiProperty({
@@ -29,7 +30,7 @@ export class LocationDto {
   city: string;
 
   @ApiPropertyOptional({
-    description: '区/县',
+    description: '区县',
     example: '南山区',
   })
   @IsString()
@@ -38,16 +39,15 @@ export class LocationDto {
 
   @ApiPropertyOptional({
     description: '详细地址',
-    example: '科技园路10号',
+    example: '粤海街道科技南路16号',
   })
   @IsString()
   @IsOptional()
   address: string;
 
   @ApiPropertyOptional({
-    description: '经纬度坐标 [经度, 纬度]',
+    description: '坐标，格式[经度,纬度]',
     example: [114.057868, 22.543099],
-    type: [Number],
   })
   @IsArray()
   @IsOptional()
@@ -72,6 +72,15 @@ export class CreateProjectDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
+  @ApiProperty({
+    description: '项目类型',
+    enum: ProjectType,
+    example: ProjectType.GENERAL_FUND,
+  })
+  @IsEnum(ProjectType)
+  @IsNotEmpty()
+  projectType: ProjectType;
 
   @ApiPropertyOptional({
     description: '项目封面图片URL',

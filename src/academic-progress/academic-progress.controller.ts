@@ -10,6 +10,12 @@ import {
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AcademicProgressService } from './academic-progress.service';
@@ -29,6 +35,7 @@ export class AcademicProgressController {
   /**
    * 获取学生的学业进展列表（前台）
    */
+  @ApiTags('学业进展-前台')
   @Get('api/front/student/:studentId/academic-progress')
   async findStudentProgressForFront(
     @Param('studentId', ParseUUIDPipe) studentId: string,
@@ -50,6 +57,7 @@ export class AcademicProgressController {
   /**
    * 获取学生学业趋势数据（前台）
    */
+  @ApiTags('学业进展-前台')
   @Get('api/front/student/:studentId/academic-trend')
   async getStudentProgressTrendForFront(
     @Param('studentId', ParseUUIDPipe) studentId: string,
@@ -70,6 +78,7 @@ export class AcademicProgressController {
   /**
    * 创建学业进展记录
    */
+  @ApiTags('学业进展-后台')
   @Post('api/admin/academic-progress')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async create(@Body() createDto: CreateAcademicProgressDto) {
@@ -79,6 +88,7 @@ export class AcademicProgressController {
   /**
    * 批量创建学业进展记录
    */
+  @ApiTags('学业进展-后台')
   @Post('api/admin/academic-progress/batch')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async batchCreate(@Body() batchDto: BatchCreateProgressDto) {
@@ -88,6 +98,7 @@ export class AcademicProgressController {
   /**
    * 查询学业进展记录列表
    */
+  @ApiTags('学业进展-后台')
   @Get('api/admin/academic-progress/list')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async findAll(@Query() queryDto: QueryAcademicProgressDto) {
@@ -97,6 +108,7 @@ export class AcademicProgressController {
   /**
    * 获取单个学业进展记录详情
    */
+  @ApiTags('学业进展-后台')
   @Get('api/admin/academic-progress/:id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
@@ -106,6 +118,7 @@ export class AcademicProgressController {
   /**
    * 更新学业进展记录
    */
+  @ApiTags('学业进展-后台')
   @Put('api/admin/academic-progress/:id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async update(
@@ -118,6 +131,7 @@ export class AcademicProgressController {
   /**
    * 删除学业进展记录
    */
+  @ApiTags('学业进展-后台')
   @Delete('api/admin/academic-progress/:id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async remove(@Param('id', ParseUUIDPipe) id: string) {
@@ -128,6 +142,7 @@ export class AcademicProgressController {
   /**
    * 获取学生的所有学业进展记录
    */
+  @ApiTags('学业进展-后台')
   @Get('api/admin/student/:studentId/academic-progress')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async findStudentProgress(
@@ -139,6 +154,7 @@ export class AcademicProgressController {
   /**
    * 获取学生的最新学业进展
    */
+  @ApiTags('学业进展-后台')
   @Get('api/admin/student/:studentId/latest-progress')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async getLatestProgress(
@@ -150,6 +166,7 @@ export class AcademicProgressController {
   /**
    * 获取学生学业进展统计
    */
+  @ApiTags('学业进展-后台')
   @Get('api/admin/student/:studentId/progress-statistics')
   @UseGuards(JwtAuthGuard, AdminGuard)
   async getProgressStatistics(

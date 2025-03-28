@@ -36,7 +36,7 @@ export class ProjectController {
    * 前台接口 - 获取项目列表
    */
   @Get('api/front/project/list')
-  @ApiTags('前台接口')
+  @ApiTags('项目模块-前台')
   @ApiOperation({
     summary: '获取项目列表',
     description: '获取所有公开的项目列表，支持分页、排序和筛选',
@@ -108,7 +108,7 @@ export class ProjectController {
    * 前台接口 - 获取项目详情
    */
   @Get('api/front/project/detail/:id')
-  @ApiTags('前台接口')
+  @ApiTags('项目模块-前台')
   @ApiOperation({
     summary: '获取项目详情',
     description: '根据项目ID获取项目的详细信息',
@@ -161,7 +161,7 @@ export class ProjectController {
    * 前台接口 - 获取项目进展
    */
   @Get('api/front/project/progress/:id')
-  @ApiTags('前台接口')
+  @ApiTags('项目模块-前台')
   @ApiOperation({
     summary: '获取项目进展',
     description: '根据项目ID获取项目的进展时间线信息',
@@ -222,7 +222,7 @@ export class ProjectController {
    * 前台接口 - 提交项目申请
    */
   @Post('api/front/project/application')
-  @ApiTags('前台接口')
+  @ApiTags('项目模块-前台')
   @ApiOperation({
     summary: '提交项目申请',
     description: '用户提交新项目申请，需要管理员审核通过后才会创建项目',
@@ -285,7 +285,7 @@ export class ProjectController {
     summary: '获取项目列表',
     description: '获取所有项目列表，支持分页和查询',
   })
-  @ApiTags('后台接口')
+  @ApiTags('项目模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取项目列表成功',
@@ -366,7 +366,7 @@ export class ProjectController {
     summary: '创建项目',
     description: '创建新的项目，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('项目模块-后台')
   @ApiResponse({
     status: 201,
     description: '创建项目成功',
@@ -426,7 +426,7 @@ export class ProjectController {
     summary: '获取项目详情',
     description: '获取指定项目的详细信息',
   })
-  @ApiTags('后台接口')
+  @ApiTags('项目模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取项目详情成功',
@@ -494,7 +494,7 @@ export class ProjectController {
     summary: '更新项目信息',
     description: '更新项目信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('项目模块-后台')
   @ApiResponse({
     status: 200,
     description: '更新项目信息成功',
@@ -563,7 +563,7 @@ export class ProjectController {
     summary: '删除项目',
     description: '删除指定的项目，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('项目模块-后台')
   @ApiResponse({
     status: 200,
     description: '删除项目成功',
@@ -606,7 +606,7 @@ export class ProjectController {
     summary: '获取项目统计',
     description: '获取项目相关的统计数据，包括总数、状态分布等',
   })
-  @ApiTags('后台接口')
+  @ApiTags('项目模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取项目统计成功',

@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StudentAidRecord } from './entities/student-aid-record.entity';
 import { Student } from '../student/entities/student.entity';
-import { Project } from '../project/entities/project.entity';
+import { Project, ProjectType } from '../project/entities/project.entity';
 import { CreateStudentAidRecordDto } from './dto/create-student-aid-record.dto';
 import { UpdateStudentAidRecordDto } from './dto/update-student-aid-record.dto';
 import { QueryStudentAidRecordDto } from './dto/query-student-aid-record.dto';
@@ -48,6 +48,16 @@ export class StudentAidRecordService {
 
       if (!project) {
         throw new NotFoundException(`ID为${createDto.projectId}的项目不存在`);
+      }
+
+      // 验证项目类型是否适合学生资助
+      if (
+        project.projectType !== ProjectType.GRANT &&
+        project.projectType !== ProjectType.SCHOLARSHIP
+      ) {
+        throw new BadRequestException(
+          `项目类型不适用于学生资助。请选择助学金或奖学金类型的项目。`,
+        );
       }
     }
 
@@ -198,6 +208,16 @@ export class StudentAidRecordService {
 
         if (!project) {
           throw new NotFoundException(`ID为${updateDto.projectId}的项目不存在`);
+        }
+
+        // 验证项目类型是否适合学生资助
+        if (
+          project.projectType !== ProjectType.GRANT &&
+          project.projectType !== ProjectType.SCHOLARSHIP
+        ) {
+          throw new BadRequestException(
+            `项目类型不适用于学生资助。请选择助学金或奖学金类型的项目。`,
+          );
         }
 
         record.project = project;

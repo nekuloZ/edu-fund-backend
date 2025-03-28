@@ -28,7 +28,7 @@ import { DocumentModule } from './document/document.module';
       port: 3306,
       username: 'root',
       password: 'P@ssw0rd',
-      database: 'demo2',
+      database: 'demo3.0',
       autoLoadEntities: true,
       synchronize: false,
       logging: true, // 添加日志记录

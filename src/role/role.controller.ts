@@ -34,7 +34,7 @@ export class RoleController {
    * 前台接口 - 获取角色列表
    */
   @Get('api/front/role/list')
-  @ApiTags('前台接口')
+  @ApiTags('角色模块-前台')
   @ApiOperation({
     summary: '获取角色列表',
     description: '获取所有公开的角色列表，支持分页和筛选',
@@ -47,7 +47,7 @@ export class RoleController {
    * 前台接口 - 获取角色详情
    */
   @Get('api/front/role/detail/:id')
-  @ApiTags('前台接口')
+  @ApiTags('角色模块-前台')
   @ApiOperation({
     summary: '获取角色详情',
     description: '根据角色ID获取角色的详细信息',
@@ -63,7 +63,7 @@ export class RoleController {
     summary: '创建角色',
     description: '创建新的角色，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('角色模块-后台')
   @ApiResponse({
     status: 201,
     description: '创建角色成功',
@@ -122,7 +122,7 @@ export class RoleController {
     summary: '获取角色列表',
     description: '获取所有角色列表，支持分页和查询',
   })
-  @ApiTags('后台接口')
+  @ApiTags('角色模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取角色列表成功',
@@ -187,7 +187,7 @@ export class RoleController {
     summary: '获取角色详情',
     description: '获取指定角色的详细信息',
   })
-  @ApiTags('后台接口')
+  @ApiTags('角色模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取角色详情成功',
@@ -254,7 +254,7 @@ export class RoleController {
     summary: '更新角色',
     description: '更新角色信息，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('角色模块-后台')
   @ApiResponse({
     status: 200,
     description: '更新角色信息成功',
@@ -322,7 +322,7 @@ export class RoleController {
     summary: '删除角色',
     description: '删除指定的角色，需要管理员权限',
   })
-  @ApiTags('后台接口')
+  @ApiTags('角色模块-后台')
   @ApiResponse({
     status: 200,
     description: '删除角色成功',
@@ -380,7 +380,7 @@ export class RoleController {
     summary: '获取角色统计',
     description: '获取角色相关的统计数据，包括总数、状态分布等',
   })
-  @ApiTags('后台接口')
+  @ApiTags('角色模块-后台')
   @ApiResponse({
     status: 200,
     description: '获取角色统计数据成功',
