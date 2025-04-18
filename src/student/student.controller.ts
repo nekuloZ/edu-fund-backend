@@ -10,6 +10,7 @@ import {
   UseGuards,
   ParseUUIDPipe,
   Request,
+  Res,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -23,9 +24,12 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { ExportUtil } from '../common/utils/export.util';
+import { Response } from 'express';
 
 @Controller()
 export class StudentController {
@@ -491,5 +495,95 @@ export class StudentController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   async getStatistics() {
     return this.studentService.getStatistics();
+  }
+
+  @ApiOperation({
+    summary: '导出学生报表',
+    description: '导出学生列表数据，支持Excel和CSV格式',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '导出成功',
+    content: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      'text/csv': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiQuery({
+    name: 'format',
+    enum: ['excel', 'csv'],
+    description: '导出格式',
+    required: false,
+    default: 'excel',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    type: Date,
+    description: '开始日期',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'endDate',
+    type: Date,
+    description: '结束日期',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'hasAidRecord',
+    type: Boolean,
+    description: '是否有资助记录',
+    required: false,
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('api/admin/student/export')
+  async exportStudents(
+    @Res() res: Response,
+    @Query('format') format: 'excel' | 'csv' = 'excel',
+    @Query('startDate') startDate?: Date,
+    @Query('endDate') endDate?: Date,
+    @Query('hasAidRecord') hasAidRecord?: boolean,
+  ) {
+    const students = await this.studentService.findAll({
+      startDate,
+      endDate,
+      hasAidRecord,
+      page: 1,
+      limit: 1000, // 导出时获取较大数量
+    });
+
+    const headers = [
+      { key: 'name', header: '姓名' },
+      { key: 'studentId', header: '学号' },
+      { key: 'gender', header: '性别' },
+      { key: 'age', header: '年龄' },
+      { key: 'grade', header: '年级' },
+      { key: 'major', header: '专业' },
+      { key: 'college', header: '学院' },
+      { key: 'contact', header: '联系方式' },
+      { key: 'address', header: '家庭住址' },
+      { key: 'hasAidRecord', header: '是否有资助记录' },
+      { key: 'createdAt', header: '创建时间' },
+      { key: 'updatedAt', header: '更新时间' },
+    ];
+
+    const filename = `学生报表_${new Date().toISOString().split('T')[0]}`;
+
+    if (format === 'excel') {
+      await ExportUtil.exportExcel(students.items, headers, filename, res);
+    } else {
+      await ExportUtil.exportCSV(students.items, headers, filename, res);
+    }
   }
 }

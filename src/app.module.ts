@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -19,9 +20,14 @@ import { AcademicProgressModule } from './academic-progress/academic-progress.mo
 import { OrganizationModule } from './organization/organization.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { DocumentModule } from './document/document.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // 全局可用
+      envFilePath: '.env',
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -30,7 +36,7 @@ import { DocumentModule } from './document/document.module';
       password: 'P@ssw0rd',
       database: 'demo3.0',
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: false, // 关闭同步，避免冲突
       logging: true, // 添加日志记录
     }),
     AuthModule,
@@ -50,6 +56,7 @@ import { DocumentModule } from './document/document.module';
     AcademicProgressModule,
     AuditLogModule,
     DocumentModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

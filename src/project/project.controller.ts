@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   ParseUUIDPipe,
+  Res,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -27,6 +28,8 @@ import {
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
+import { Response } from 'express';
+import { ExportUtil } from '../common/utils/export.util';
 
 @Controller()
 export class ProjectController {
@@ -645,5 +648,92 @@ export class ProjectController {
   @Get('api/admin/projects/statistics')
   async getStatistics() {
     return await this.projectService.getStatistics();
+  }
+
+  @ApiOperation({
+    summary: '导出项目报表',
+    description: '导出项目列表数据，支持Excel和CSV格式',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '导出成功',
+    content: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      'text/csv': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiQuery({
+    name: 'format',
+    enum: ['excel', 'csv'],
+    description: '导出格式',
+    required: false,
+    default: 'excel',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    type: Date,
+    description: '开始日期',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'endDate',
+    type: Date,
+    description: '结束日期',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'status',
+    enum: ['active', 'completed', 'pending'],
+    description: '项目状态',
+    required: false,
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('api/admin/project/export')
+  async exportProjects(
+    @Res() res: Response,
+    @Query('format') format: 'excel' | 'csv' = 'excel',
+    @Query('startDate') startDate?: Date,
+    @Query('endDate') endDate?: Date,
+    @Query('status') status?: string[],
+  ) {
+    const projects = await this.projectService.findAll({
+      startDate,
+      endDate,
+      status,
+      page: 1,
+      limit: 1000, // 导出时获取较大数量
+    });
+
+    const headers = [
+      { key: 'title', header: '项目名称' },
+      { key: 'description', header: '项目描述' },
+      { key: 'status', header: '项目状态' },
+      { key: 'startDate', header: '开始日期' },
+      { key: 'endDate', header: '结束日期' },
+      { key: 'budget', header: '预算金额' },
+      { key: 'allocatedAmount', header: '已分配金额' },
+      { key: 'createdAt', header: '创建时间' },
+      { key: 'updatedAt', header: '更新时间' },
+    ];
+
+    const filename = `项目报表_${new Date().toISOString().split('T')[0]}`;
+
+    if (format === 'excel') {
+      await ExportUtil.exportExcel(projects.items, headers, filename, res);
+    } else {
+      await ExportUtil.exportCSV(projects.items, headers, filename, res);
+    }
   }
 }

@@ -134,7 +134,7 @@ export class ProjectTimelineController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiTags('项目时间线-后台')
-  @Post('api/admin/project-timeline')
+  @Post('api/admin/project/timeline')
   async create(
     @Body() createProjectTimelineDto: CreateProjectTimelineDto,
     @Req() req,
@@ -207,7 +207,7 @@ export class ProjectTimelineController {
     type: 'string',
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
   })
-  @Get('api/front/project-timeline/:projectId')
+  @Get('api/front/project/timeline/:projectId')
   async findAll(@Param('projectId', ParseUUIDPipe) projectId: string) {
     return await this.timelineService.findByProjectId(projectId);
   }
@@ -269,7 +269,7 @@ export class ProjectTimelineController {
     type: 'string',
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
   })
-  @Get('api/front/project-timeline/detail/:id')
+  @Get('api/front/project/timeline/detail/:id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.timelineService.findOne(id);
   }
@@ -332,7 +332,7 @@ export class ProjectTimelineController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Put('api/admin/project-timeline/:id')
+  @Put('api/admin/project/timeline/:id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProjectTimelineDto: UpdateProjectTimelineDto,
@@ -376,7 +376,7 @@ export class ProjectTimelineController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Delete('api/admin/project-timeline/:id')
+  @Delete('api/admin/project/timeline/:id')
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.timelineService.remove(id);
     return { success: true, message: '时间线记录删除成功' };

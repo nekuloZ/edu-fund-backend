@@ -33,9 +33,19 @@ export class User {
   realName: string;
 
   @ManyToMany(() => Role, (role) => role.users)
-  @JoinTable()
+  @JoinTable({
+    name: 'users_roles',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'role_id',
+      referencedColumnName: 'id',
+    },
+  })
   roles: Role[];
-  @Column({ default: true })
+  @Column({ default: true, name: 'is_active' })
   isActive: boolean;
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

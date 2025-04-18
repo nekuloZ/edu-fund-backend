@@ -10,22 +10,29 @@ import {
   Request,
   ParseUUIDPipe,
   ForbiddenException,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { FundAllocationService } from './fund-allocation.service';
 import { CreateFundAllocationDto } from './dto/create-fund-allocation.dto';
-import { UpdateFundAllocationDto } from './dto/update-fund-allocation.dto';
+import {
+  UpdateFundAllocationDto,
+  FundAllocationStatus,
+} from './dto/update-fund-allocation.dto';
 import { QueryFundAllocationDto } from './dto/query-fund-allocation.dto';
 import { ApprovalFundAllocationDto } from './dto/approval-fund-allocation.dto';
+import { ExportUtil } from '../common/utils/export.util';
 
 @ApiTags('资金分配-前台和后台')
 @Controller()
@@ -632,5 +639,94 @@ export class FundAllocationController {
   @Get('api/admin/fund/allocation/statistics')
   async getStatistics() {
     return await this.fundAllocationService.getStatistics();
+  }
+
+  @ApiOperation({
+    summary: '导出资金分配报表',
+    description: '导出资金分配记录，支持Excel和CSV格式',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '导出成功',
+    content: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      'text/csv': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiQuery({
+    name: 'format',
+    enum: ['excel', 'csv'],
+    description: '导出格式',
+    required: false,
+    default: 'excel',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    type: Date,
+    description: '开始日期',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'endDate',
+    type: Date,
+    description: '结束日期',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'status',
+    enum: ['pending', 'approved', 'rejected', 'completed'],
+    description: '分配状态',
+    required: false,
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'financial')
+  @Get('api/admin/fund/allocation/export')
+  async exportFundAllocations(
+    @Res() res: Response,
+    @Query('format') format: 'excel' | 'csv' = 'excel',
+    @Query('startDate') startDate?: Date,
+    @Query('endDate') endDate?: Date,
+    @Query('status') status?: FundAllocationStatus,
+  ) {
+    const allocations = await this.fundAllocationService.findAll({
+      startDate,
+      endDate,
+      status,
+      page: 1,
+      limit: 1000, // 导出时获取较大数量
+    });
+
+    const headers = [
+      { key: 'project.title', header: '项目名称' },
+      { key: 'amount', header: '分配金额' },
+      { key: 'date', header: '分配日期' },
+      { key: 'status', header: '分配状态' },
+      { key: 'description', header: '分配说明' },
+      { key: 'operator.username', header: '操作人' },
+      { key: 'approver.username', header: '审批人' },
+      { key: 'approvalDate', header: '审批日期' },
+      { key: 'approvalComment', header: '审批意见' },
+      { key: 'createdAt', header: '创建时间' },
+      { key: 'updatedAt', header: '更新时间' },
+    ];
+
+    const filename = `资金分配报表_${new Date().toISOString().split('T')[0]}`;
+
+    if (format === 'excel') {
+      await ExportUtil.exportExcel(allocations.items, headers, filename, res);
+    } else {
+      await ExportUtil.exportCSV(allocations.items, headers, filename, res);
+    }
   }
 }

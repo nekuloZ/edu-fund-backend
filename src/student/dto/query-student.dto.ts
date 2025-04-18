@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsEnum, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsNumber, IsDate, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Gender } from './create-student.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
@@ -74,4 +74,30 @@ export class QueryStudentDto {
   @IsOptional()
   @Type(() => Number)
   limit?: number = 10;
+
+  @ApiPropertyOptional({
+    description: '开始日期',
+    type: Date,
+  })
+  @IsDate()
+  @Type(() => Date)
+  @IsOptional()
+  startDate?: Date;
+
+  @ApiPropertyOptional({
+    description: '结束日期',
+    type: Date,
+  })
+  @IsDate()
+  @Type(() => Date)
+  @IsOptional()
+  endDate?: Date;
+
+  @ApiPropertyOptional({
+    description: '是否有资助记录',
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  hasAidRecord?: boolean;
 }

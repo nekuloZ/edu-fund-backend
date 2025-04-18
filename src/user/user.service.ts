@@ -77,22 +77,25 @@ export class UserService {
    * 根据用户名查找用户
    */
   async findByUsername(username: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { username },
-      relations: ['roles'],
-      select: [
-        'id',
-        'username',
-        'password',
-        'email',
-        'phoneNumber',
-        'avatar',
-        'realName',
-        'isActive',
-        'createdAt',
-        'updatedAt',
-      ],
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.roles', 'role')
+      .select([
+        'user.id',
+        'user.username',
+        'user.password',
+        'user.email',
+        'user.phoneNumber',
+        'user.avatar',
+        'user.realName',
+        'user.isActive',
+        'user.createdAt',
+        'user.updatedAt',
+        'role.id',
+        'role.name',
+      ])
+      .where('user.username = :username', { username })
+      .getOne();
 
     return user;
   }
@@ -103,22 +106,25 @@ export class UserService {
   async findByEmail(email: string): Promise<User> {
     if (!email) return null;
 
-    const user = await this.userRepository.findOne({
-      where: { email },
-      relations: ['roles'],
-      select: [
-        'id',
-        'username',
-        'password',
-        'email',
-        'phoneNumber',
-        'avatar',
-        'realName',
-        'isActive',
-        'createdAt',
-        'updatedAt',
-      ],
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.roles', 'role')
+      .select([
+        'user.id',
+        'user.username',
+        'user.password',
+        'user.email',
+        'user.phoneNumber',
+        'user.avatar',
+        'user.realName',
+        'user.isActive',
+        'user.createdAt',
+        'user.updatedAt',
+        'role.id',
+        'role.name',
+      ])
+      .where('user.email = :email', { email })
+      .getOne();
 
     return user;
   }
@@ -195,6 +201,20 @@ export class UserService {
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.roles', 'role')
+      .select([
+        'user.id',
+        'user.username',
+        'user.email',
+        'user.phoneNumber',
+        'user.avatar',
+        'user.realName',
+        'user.isActive',
+        'user.createdAt',
+        'user.updatedAt',
+        'role.id',
+        'role.name',
+        'role.description',
+      ])
       .skip((page - 1) * limit)
       .take(limit);
 

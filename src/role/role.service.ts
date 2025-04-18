@@ -74,6 +74,19 @@ export class RoleService {
     const queryBuilder = this.roleRepository
       .createQueryBuilder('role')
       .leftJoinAndSelect('role.permissions', 'permission')
+      .select([
+        'role.id',
+        'role.name',
+        'role.description',
+        'role.isActive',
+        'role.createdAt',
+        'role.updatedAt',
+        'permission.id',
+        'permission.name',
+        'permission.code',
+        'permission.description',
+        'permission.module',
+      ])
       .skip((page - 1) * limit)
       .take(limit);
 

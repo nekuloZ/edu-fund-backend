@@ -39,8 +39,10 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   await app.listen(3000);
-  console.log('服务器运行在 http://localhost:3000');
-  console.log('API文档可在 http://localhost:3000/api-docs 访问');
+  console.log('服务器运行在');
+  console.log('http://localhost:3000');
+  console.log('API文档');
+  console.log('http://localhost:3000/api-docs');
   console.log('您也可以使用导出的JSON文件生成其他格式的文档');
 }
 bootstrap();

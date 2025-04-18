@@ -10,13 +10,17 @@ import {
   Request,
   ParseUUIDPipe,
   ForbiddenException,
+  Query,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -26,6 +30,7 @@ import { UpdateFundPoolDto } from './dto/update-fund-pool.dto';
 import { AdjustBalanceDto } from './dto/adjust-balance.dto';
 import { SetWarningLineDto } from './dto/set-warning-line.dto';
 import { CreateFundPoolDto } from './dto/create-fund-pool.dto';
+import { ExportUtil } from '../common/utils/export.util';
 
 @ApiTags('资金池-前台和后台')
 @Controller()
@@ -367,5 +372,91 @@ export class FundPoolController {
   @Post('api/admin/fund/unmark-pending/:amount')
   async unmarkPendingAmount(@Param('amount', ParseFloatPipe) amount: number) {
     return await this.fundPoolService.unmarkPendingAmount(amount);
+  }
+
+  @ApiOperation({
+    summary: '导出资金池报表',
+    description: '导出资金池变动记录，支持Excel和CSV格式',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '导出成功',
+    content: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      'text/csv': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiQuery({
+    name: 'format',
+    enum: ['excel', 'csv'],
+    description: '导出格式',
+    required: false,
+    default: 'excel',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    type: Date,
+    description: '开始日期',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'endDate',
+    type: Date,
+    description: '结束日期',
+    required: false,
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'financial')
+  @Get('api/admin/fund/pool/export')
+  async exportFundPool(
+    @Res() res: Response,
+    @Query('format') format: 'excel' | 'csv' = 'excel',
+    @Query('startDate') _startDate?: Date,
+    @Query('endDate') _endDate?: Date,
+  ) {
+    const fundPool = await this.fundPoolService.getFundPool();
+    const fundStatus = await this.fundPoolService.getFundStatus();
+    const data = [
+      {
+        totalBalance: fundPool.totalBalance,
+        availableBalance: fundPool.availableBalance,
+        allocatedAmount: fundPool.allocatedAmount,
+        pendingAmount: fundPool.pendingAmount,
+        warningLine: fundPool.warningLine,
+        isUnderWarningLine: fundStatus.isUnderWarningLine,
+        balancePercentage: fundStatus.balancePercentage,
+        lastUpdated: fundPool.lastUpdated,
+      },
+    ];
+
+    const headers = [
+      { key: 'totalBalance', header: '总余额' },
+      { key: 'availableBalance', header: '可用余额' },
+      { key: 'allocatedAmount', header: '已分配金额' },
+      { key: 'pendingAmount', header: '待处理金额' },
+      { key: 'warningLine', header: '警戒线' },
+      { key: 'isUnderWarningLine', header: '是否低于警戒线' },
+      { key: 'balancePercentage', header: '余额百分比' },
+      { key: 'lastUpdated', header: '最后更新时间' },
+    ];
+
+    const filename = `资金池报表_${new Date().toISOString().split('T')[0]}`;
+
+    if (format === 'excel') {
+      await ExportUtil.exportExcel(data, headers, filename, res);
+    } else {
+      await ExportUtil.exportCSV(data, headers, filename, res);
+    }
   }
 }

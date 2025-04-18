@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
@@ -84,6 +85,26 @@ export class QueryProjectDto {
   @Type(() => Number)
   @IsNumber()
   limit?: number = 10;
+
+  @ApiPropertyOptional({
+    description: '开始日期',
+    example: '2023-01-01T00:00:00Z',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  startDate?: Date;
+
+  @ApiPropertyOptional({
+    description: '结束日期',
+    example: '2023-12-31T23:59:59Z',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  endDate?: Date;
 
   @ApiPropertyOptional({
     description: '排序字段',

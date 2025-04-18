@@ -327,4 +327,57 @@ export class AuthController {
 
     return await this.authService.logout(refreshToken);
   }
+
+  /**
+   * 测试JWT认证
+   */
+  @Get('api/admin/auth/test-jwt')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '测试JWT认证',
+    description: '用于测试JWT认证是否正常工作',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '认证成功',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: '认证成功' },
+        user: { type: 'object' },
+      },
+    },
+  })
+  testJwt(@Request() req) {
+    return {
+      message: '认证成功',
+      user: req.user,
+    };
+  }
+
+  /**
+   * JWT诊断工具
+   */
+  @Post('api/admin/auth/jwt-diagnostic')
+  @ApiOperation({
+    summary: 'JWT诊断工具',
+    description: '用于生成和验证JWT令牌，帮助调试认证问题',
+  })
+  jwtDiagnostic(@Body() payload: any) {
+    const secret = this.authService.getJwtSecret();
+    const token = this.authService.generateToken(payload);
+    let verifyResult;
+    try {
+      verifyResult = this.authService.verifyToken(token);
+    } catch (error) {
+      verifyResult = { error: error.message };
+    }
+    return {
+      secret: `${secret.substring(0, 3)}...${secret.substring(secret.length - 3)}`,
+      payload,
+      token,
+      tokenVerification: verifyResult,
+    };
+  }
 }

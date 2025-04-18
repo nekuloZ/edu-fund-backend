@@ -3,7 +3,15 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
   @ApiProperty({
-    description: '用户名称',
+    description: '用户名',
+    example: 'admin',
+  })
+  @IsString()
+  @IsNotEmpty({ message: '用户名不能为空' })
+  username: string;
+
+  @ApiProperty({
+    description: '用户姓名',
     example: '张三',
   })
   @IsString()
